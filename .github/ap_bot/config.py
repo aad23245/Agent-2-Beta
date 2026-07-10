@@ -37,7 +37,7 @@ PR_AUTHOR: Optional[str] = os.getenv("PR_AUTHOR")
 # API & Model Constants
 # ---------------------------------------------------------------------------
 GITHUB_API_BASE: str = "https://api.github.com"
-GEMINI_MODEL: str = "gemini-2.5-flash-lite"
+GEMINI_MODEL: str = "gemini-2.5-flash"
 STALE_DAYS: int = 180
 GRACE_PERIOD_DAYS: int = 7
 MAX_SUMMARY_LENGTH: int = 500
