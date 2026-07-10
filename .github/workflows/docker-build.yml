@@ -1,0 +1,48 @@
+﻿# Author: Aarav Shah
+# Portfolio: aaravshah1311.is-great.net
+# github: github.com/aaravshah1311
+
+# =============================================================================
+# Docker Build Validation
+# Validates that the project's Dockerfile builds successfully on pushes
+# and PRs to main. Does not push images â€” this is a build-only check.
+# Only runs when a Dockerfile exists in the repository root.
+# =============================================================================
+
+name: "Docker Build Validation"
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: docker-build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  docker-build:
+    name: Build Docker Image
+    runs-on: ubuntu-latest
+    if: hashFiles('Dockerfile') != ''
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: false
+          tags: agent2:test
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

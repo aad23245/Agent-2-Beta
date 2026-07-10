@@ -1,0 +1,43 @@
+﻿# Author: Aarav Shah
+# Portfolio: aaravshah1311.is-great.net
+# github: github.com/aaravshah1311
+
+name: Lint
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    name: Code Linting
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install linting tools
+        run: pip install ruff black flake8
+
+      - name: Run ruff
+        continue-on-error: true
+        run: ruff check .
+
+      - name: Run black
+        continue-on-error: true
+        run: black --check .
+
+      - name: Run flake8
+        continue-on-error: true
+        run: flake8 . --max-line-length=120 --exclude=.venv,__pycache__

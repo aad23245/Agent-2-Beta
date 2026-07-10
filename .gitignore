@@ -1,0 +1,38 @@
+﻿# Local secrets
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Local databases and runtime output
+*.db
+*.sqlite
+*.sqlite3
+*.log
+.github/ap_bot/cache/
+.github/ap_bot/logs/
+
+# OS/editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# html files
+index.html
+wdocs.html
+website.html
