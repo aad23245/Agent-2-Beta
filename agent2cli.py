@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+# Author: Aarav Shah
+# Portfolio: aaravshah1311.is-great.net
+# github: github.com/aaravshah1311
+
 """
 agent2cli.py  —  Agent 2 CLI
 ────────────────────────────
@@ -138,14 +142,12 @@ def shell_argv(cmd: str) -> list:
 
 # ── Models & modes ─────────────────────────────────────────────────────────────
 MODELS = {
-    "2.5-flash-lite": "gemini-2.5-flash-lite",
-    "2.5-flash":      "gemini-2.5-flash",
+        "2.5-flash":      "gemini-2.5-flash",
     "2.5-pro":        "gemini-2.5-pro",
-    "3.1-flash-lite": "gemini-3.1-flash-lite",
     "3.1-flash":      "gemini-3.1-flash",
     "3.1-pro":        "gemini-3.1-pro",
 }
-DEFAULT_MODEL = "2.5-flash-lite"
+DEFAULT_MODEL = "2.5-flash"
 
 MODES = {
     "fast":     {"icon": "⚡", "max_tokens": 2048,  "thinking": False},
@@ -334,7 +336,7 @@ def print_help():
     cmds = [
         ("/help",             "Show this help"),
         ("/addapi",           "Add a Gemini API key to .env"),
-        ("/model [name]",     "Switch model  (2.5-flash-lite | 2.5-flash | 2.5-pro | 3.1-*)"),
+        ("/model [name]",     "Switch model  (2.5-flash | 2.5-pro | 3.1-flash | 3.1-pro)"),
         ("/mode [name]",      "Switch mode   (fast ⚡ | pro ★ | thinking 🧠)"),
         ("/clear",            "Clear conversation (start fresh)"),
         ("/shrink",           "Summarize and shrink history manually"),
@@ -858,7 +860,7 @@ def run_agent(
         ),
         max_output_tokens=mode_cfg["max_tokens"],
     )
-    if mode_cfg.get("thinking") and model_key in ("2.5-pro","3.1-flash","3.1-pro","3.1-flash-lite","2.5-flash","2.5-flash-lite"):
+    if mode_cfg.get("thinking") and model_key in ("2.5-pro", "3.1-flash", "3.1-pro", "2.5-flash"):
         try:
             cfg_kw["thinking_config"] = gtypes.ThinkingConfig(
                 thinking_budget=mode_cfg.get("thinking_budget", 8000))
@@ -904,7 +906,7 @@ def run_agent(
                     status_line(f"Quota hit on key #{label} — switching to key #{l2}", "warning")
                     client, key, label = c2, k2, l2
                     continue
-            hint = "\n  Tip: /model 2.5-flash-lite" if is_model else ""
+            hint = "\n  Tip: /model 2.5-flash" if is_model else ""
             status_line(f"API Error ({model_key}): {es}{hint}", "error")
             return history
         finally:
@@ -915,7 +917,7 @@ def run_agent(
             candidate = resp.candidates[0] if resp.candidates else None
             if not candidate or not candidate.content:
                 fr = getattr(candidate, "finish_reason", "?") if candidate else "none"
-                status_line(f"Empty response (finish_reason={fr}). Try /model 2.5-flash-lite", "warning")
+                status_line(f"Empty response (finish_reason={fr}). Try /model 2.5-flash", "warning")
                 return history
             parts = candidate.content.parts or []
         except Exception as ex:

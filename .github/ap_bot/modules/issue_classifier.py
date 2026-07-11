@@ -1,9 +1,9 @@
-﻿# Author: Aarav Shah
+# Author: Aarav Shah
 # Portfolio: aaravshah1311.is-great.net
 # github: github.com/aaravshah1311
 
 """
-AP Bot â€” AI Issue Classifier Module.
+AP Bot — AI Issue Classifier Module.
 
 Uses Gemini AI to analyze an issue's title and body and classify it
 into one or more predefined categories, then applies the corresponding
@@ -12,7 +12,7 @@ labels and posts a summary comment.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 from ..config import config
 from ..logger import logger
@@ -59,7 +59,7 @@ _CLASSIFICATION_PROMPT: str = (
 # ---------------------------------------------------------------------------
 
 
-def run(github_api: "GitHubAPI", gemini_client: "GeminiClient") -> list[str]:
+def run(github_api: GitHubAPI, gemini_client: GeminiClient) -> list[str]:
     """Classify an issue using Gemini AI and apply labels.
 
     Fetches the issue from the GitHub API, sends its title and body to
@@ -73,7 +73,7 @@ def run(github_api: "GitHubAPI", gemini_client: "GeminiClient") -> list[str]:
     Returns:
         A list of label strings that were applied.
     """
-    issue_number: int | None = config.ISSUE_NUMBER
+    issue_number: Optional[int] = config.ISSUE_NUMBER
     if not issue_number:
         logger.error("No ISSUE_NUMBER found in config. Aborting issue classification.")
         return []
@@ -104,7 +104,7 @@ def run(github_api: "GitHubAPI", gemini_client: "GeminiClient") -> list[str]:
         # -- Post summary comment --------------------------------------------
         label_list = ", ".join(f"`{lbl}`" for lbl in labels)
         comment_body = (
-            f"ðŸ·ï¸ **AI Classification**\n\n"
+            f"🏷️ **AI Classification**\n\n"
             f"This issue has been automatically classified into the following "
             f"categories:\n\n{label_list}\n\n"
             f"_Labels have been applied accordingly. A maintainer will verify "

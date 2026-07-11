@@ -1,4 +1,4 @@
-﻿# Author: Aarav Shah
+# Author: Aarav Shah
 # Portfolio: aaravshah1311.is-great.net
 # github: github.com/aaravshah1311
 
@@ -8,6 +8,6 @@ Title: {title}
 Body: {body}
 
 Respond with:
-SPAM: <reason> â€” if the content is spam
-LOW_QUALITY: <reason> â€” if the content is too low quality to be useful
-LEGITIMATE â€” if the content appears genuine
+SPAM: <reason> — if the content is spam
+LOW_QUALITY: <reason> — if the content is too low quality to be useful
+LEGITIMATE — if the content appears genuine

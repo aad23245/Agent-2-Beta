@@ -1,4 +1,4 @@
-﻿# Author: Aarav Shah
+# Author: Aarav Shah
 # Portfolio: aaravshah1311.is-great.net
 # github: github.com/aaravshah1311
 
@@ -11,6 +11,7 @@
 name: "Gitleaks Secret Scanning"
 
 on:
+  workflow_dispatch:
   push:
   pull_request:
 

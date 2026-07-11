@@ -1,9 +1,9 @@
-﻿# Author: Aarav Shah
+# Author: Aarav Shah
 # Portfolio: aaravshah1311.is-great.net
 # github: github.com/aaravshah1311
 
 """
-AP Bot â€” Label Manager Module.
+AP Bot — Label Manager Module.
 
 Manages repository labels, including syncing default configurations and
 applying/removing labels on issues and pull requests.

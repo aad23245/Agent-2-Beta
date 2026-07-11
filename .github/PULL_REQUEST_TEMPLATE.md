@@ -1,31 +1,37 @@
-﻿<!--
+<!--
 Author: Aarav Shah
 Portfolio: aaravshah1311.is-great.net
 github: github.com/aaravshah1311
 -->
 
-## ðŸ“‹ Description
+<!--
+# Author: Aarav Shah
+# Portfolio: aaravshah1311.is-great.net
+# github: github.com/aaravshah1311
+-->
+
+## 📋 Description
 
 <!-- Provide a brief description of the changes -->
 
-## ðŸ”— Related Issue
+## 🔗 Related Issue
 
 <!-- Link to the related issue: Fixes #(issue_number) -->
 
-Fixes #
+# Fixes
 
-## ðŸ·ï¸ Type of Change
+## 🏷️ Type of Change
 
-- [ ] ðŸ› Bug fix (non-breaking change that fixes an issue)
-- [ ] âœ¨ New feature (non-breaking change that adds functionality)
-- [ ] ðŸ’¥ Breaking change (fix or feature that would cause existing functionality to change)
-- [ ] ðŸ“ Documentation update
-- [ ] ðŸ”§ Refactoring (no functional changes)
-- [ ] ðŸ§ª Test update
-- [ ] ðŸ“¦ Dependency update
-- [ ] ðŸŽ¨ UI/Style improvement
+- [ ] 🐛 Bug fix (non-breaking change that fixes an issue)
+- [ ] ✨ New feature (non-breaking change that adds functionality)
+- [ ] 💥 Breaking change (fix or feature that would cause existing functionality to change)
+- [ ] 📝 Documentation update
+- [ ] 🔧 Refactoring (no functional changes)
+- [ ] 🧪 Test update
+- [ ] 📦 Dependency update
+- [ ] 🎨 UI/Style improvement
 
-## âœ… Checklist
+## ✅ Checklist
 
 - [ ] My code follows the project's style guidelines
 - [ ] I have performed a self-review of my code
@@ -35,10 +41,10 @@ Fixes #
 - [ ] I have added tests that prove my fix is effective or my feature works
 - [ ] New and existing unit tests pass locally with my changes
 
-## ðŸ“¸ Screenshots (if applicable)
+## 📸 Screenshots (if applicable)
 
 <!-- Add screenshots to help explain your changes -->
 
-## ðŸ“ Additional Notes
+## 📝 Additional Notes
 
 <!-- Any additional information that reviewers should know -->

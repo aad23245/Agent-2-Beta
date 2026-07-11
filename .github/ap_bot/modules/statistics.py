@@ -1,9 +1,9 @@
-﻿# Author: Aarav Shah
+# Author: Aarav Shah
 # Portfolio: aaravshah1311.is-great.net
 # github: github.com/aaravshah1311
 
 """
-AP Bot â€” Repository Statistics Module.
+AP Bot — Repository Statistics Module.
 
 Queries the GitHub API to gather repository activity metrics, including
 open/closed issues, open/merged PRs, label distributions, and top contributors,
@@ -13,7 +13,7 @@ then formats them into a comprehensive markdown report.
 from __future__ import annotations
 
 from collections import Counter
-from typing import TYPE_CHECKING, Dict, List
+from typing import TYPE_CHECKING, Dict, List, Optional
 
 from ..config import config
 from ..logger import logger
@@ -23,7 +23,7 @@ if TYPE_CHECKING:
     from ..github_api import GitHubAPI
 
 
-def run(github_api: "GitHubAPI", gemini_client: "GeminiClient" | None = None) -> None:
+def run(github_api: GitHubAPI, gemini_client: Optional[GeminiClient] = None) -> None:
     """Gather repository statistics and log/report them.
 
     Args:
@@ -128,23 +128,23 @@ def _generate_report_markdown(
     total_prs = open_prs + merged_prs
     
     lines = [
-        "## ðŸ“Š Repository Statistics Report",
+        "## 📊 Repository Statistics Report",
         "",
-        "### ðŸ“ˆ General Metrics",
-        f"- â­ **Stars:** {stars}",
-        f"- ðŸ´ **Forks:** {forks}",
+        "### 📈 General Metrics",
+        f"- ⭐ **Stars:** {stars}",
+        f"- 🍴 **Forks:** {forks}",
         "",
-        "### ðŸ› Issue Triage Summary",
-        f"- ðŸŸ¢ **Open Issues:** {open_issues}",
-        f"- ðŸ”´ **Closed Issues:** {closed_issues}",
-        f"- ðŸ“Š **Resolution Rate:** {closed_issues / max(1, total_issues):.1%}",
+        "### 🐛 Issue Triage Summary",
+        f"- 🟢 **Open Issues:** {open_issues}",
+        f"- 🔴 **Closed Issues:** {closed_issues}",
+        f"- 📊 **Resolution Rate:** {closed_issues / max(1, total_issues):.1%}",
         "",
-        "### ðŸ”€ Pull Request Summary",
-        f"- ðŸŸ¢ **Open Pull Requests:** {open_prs}",
-        f"- ðŸ’œ **Merged Pull Requests:** {merged_prs}",
-        f"- ðŸ“Š **Merge Rate:** {merged_prs / max(1, total_prs):.1%}",
+        "### 🔀 Pull Request Summary",
+        f"- 🟢 **Open Pull Requests:** {open_prs}",
+        f"- 💜 **Merged Pull Requests:** {merged_prs}",
+        f"- 📊 **Merge Rate:** {merged_prs / max(1, total_prs):.1%}",
         "",
-        "### ðŸ·ï¸ Label Distribution (Open Issues)",
+        "### 🏷️ Label Distribution (Open Issues)",
     ]
 
     if not labels:
@@ -155,7 +155,7 @@ def _generate_report_markdown(
 
     lines.extend([
         "",
-        "### ðŸ† Top Contributors",
+        "### 🏆 Top Contributors",
     ])
 
     if not contributors:
@@ -164,6 +164,6 @@ def _generate_report_markdown(
         for idx, c in enumerate(contributors, 1):
             username = c.get("login", "unknown")
             contributions = c.get("contributions", 0)
-            lines.append(f"{idx}. **@{username}** â€” {contributions} contributions")
+            lines.append(f"{idx}. **@{username}** — {contributions} contributions")
 
     return "\n".join(lines)

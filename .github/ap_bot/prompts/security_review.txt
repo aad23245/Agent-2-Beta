@@ -1,4 +1,4 @@
-﻿# Author: Aarav Shah
+# Author: Aarav Shah
 # Portfolio: aaravshah1311.is-great.net
 # github: github.com/aaravshah1311
 
@@ -17,8 +17,8 @@ Code Diff:
 {diff}
 
 For each issue found, provide:
-- ðŸ”´ CRITICAL / ðŸŸ¡ WARNING / ðŸŸ¢ INFO severity level
+- 🔴 CRITICAL / 🟡 WARNING / 🟢 INFO severity level
 - Description of the issue
 - Recommended fix
 
-If no security issues are found, respond with: âœ… No security concerns detected in this change.
+If no security issues are found, respond with: ✅ No security concerns detected in this change.

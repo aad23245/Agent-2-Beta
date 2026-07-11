@@ -1,9 +1,9 @@
-﻿# Author: Aarav Shah
+# Author: Aarav Shah
 # Portfolio: aaravshah1311.is-great.net
 # github: github.com/aaravshah1311
 
 """
-AP Bot â€” Gemini AI Client Module.
+AP Bot — Gemini AI Client Module.
 
 Provides the ``GeminiClient`` class for interacting with Google's Gemini
 generative AI models.  Used across all AP Bot modules that require
@@ -12,7 +12,7 @@ AI-powered analysis, classification, or text generation.
 
 from typing import Optional
 
-import google.generativeai as genai
+from google import genai
 
 from .config import GEMINI_MODEL
 from .logger import logger
@@ -21,25 +21,24 @@ from .logger import logger
 class GeminiClient:
     """Client for Google Gemini generative AI.
 
-    Wraps the ``google.generativeai`` SDK to provide a simple interface
+    Wraps the ``google-genai`` SDK to provide a simple interface
     for prompt-based analysis and classification tasks.
 
     Attributes:
-        model: The configured :class:`genai.GenerativeModel` instance.
+        client: The configured :class:`genai.Client` instance.
     """
 
     def __init__(self, api_key: str) -> None:
         """Initialise the Gemini client.
 
-        Configures the ``google.generativeai`` library with the provided
-        API key and instantiates the model specified in
-        :data:`config.GEMINI_MODEL`.
+        Configures the `google-genai` client with the provided API key.
+
+        Uses the model specified in ``config.GEMINI_MODEL``.
 
         Args:
             api_key: Google Gemini API key.
         """
-        genai.configure(api_key=api_key)
-        self.model: genai.GenerativeModel = genai.GenerativeModel(GEMINI_MODEL)
+        self.client: genai.Client = genai.Client(api_key=api_key)
         logger.info("GeminiClient initialised with model: %s", GEMINI_MODEL)
 
     def analyze(
@@ -59,14 +58,13 @@ class GeminiClient:
             The generated response text, or ``None`` if an error occurs.
         """
         try:
-            generation_config = genai.types.GenerationConfig(
-                max_output_tokens=max_tokens,
-                temperature=0.3,
-            )
-
-            response = self.model.generate_content(
-                prompt,
-                generation_config=generation_config,
+            response = self.client.models.generate_content(
+                model=GEMINI_MODEL,
+                contents=prompt,
+                config={
+                    "max_output_tokens": max_tokens,
+                    "temperature": 0.3,
+                },
             )
 
             if response and response.text:

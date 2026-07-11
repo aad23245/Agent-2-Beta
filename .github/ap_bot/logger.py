@@ -1,9 +1,9 @@
-﻿# Author: Aarav Shah
+# Author: Aarav Shah
 # Portfolio: aaravshah1311.is-great.net
 # github: github.com/aaravshah1311
 
 """
-AP Bot â€” Structured Logger Module.
+AP Bot — Structured Logger Module.
 
 Provides a consistent, structured logging setup for all AP Bot modules.
 Logs are directed to stdout for seamless GitHub Actions log capture.

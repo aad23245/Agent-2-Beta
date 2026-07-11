@@ -1,16 +1,16 @@
-﻿<!--
+<!--
 Author: Aarav Shah
 Portfolio: aaravshah1311.is-great.net
 github: github.com/aaravshah1311
 -->
 
-ðŸ‘‹ **Thank you for submitting this Pull Request!**
+👋 **Thank you for submitting this Pull Request!**
 
 Our AI assistant will perform the following automated checks:
-- ðŸ·ï¸ PR categorization and labeling
-- ðŸ” AI-powered code review
-- ðŸ›¡ï¸ Security analysis
-- ðŸ“‹ Change summary
+- 🏷️ PR categorization and labeling
+- 🔍 AI-powered code review
+- 🛡️ Security analysis
+- 📋 Change summary
 
 Please ensure your PR:
 - [ ] Has a clear description of the changes
@@ -18,4 +18,4 @@ Please ensure your PR:
 - [ ] Follows the project's coding standards
 - [ ] Updates documentation if needed
 
-A human maintainer will review your contribution soon. Thank you for helping improve **Agent-2**! ðŸš€
+A human maintainer will review your contribution soon. Thank you for helping improve **Agent-2**! 🚀

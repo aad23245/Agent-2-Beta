@@ -1,3 +1,7 @@
+# Author: Aarav Shah
+# Portfolio: aaravshah1311.is-great.net
+# github: github.com/aaravshah1311
+
 """
 agent2/database.py
 ──────────────────
@@ -52,7 +56,7 @@ def init_db() -> None:
         CREATE TABLE IF NOT EXISTS chats (
             id         TEXT PRIMARY KEY,
             title      TEXT DEFAULT 'New Chat',
-            model      TEXT DEFAULT 'gemini-2.5-flash-lite',
+            model      TEXT DEFAULT 'gemini-2.5-flash',
             mode       TEXT DEFAULT 'pro',
             created_at TEXT DEFAULT(datetime('now')),
             updated_at TEXT DEFAULT(datetime('now'))
@@ -91,7 +95,7 @@ def init_db() -> None:
 
     # ── Migrations: add columns that may not exist on older DBs ───────────────
     _migrations = [
-        ("chats",    "model", "TEXT DEFAULT 'gemini-2.5-flash-lite'"),
+        ("chats",    "model", "TEXT DEFAULT 'gemini-2.5-flash'"),
         ("chats",    "mode",  "TEXT DEFAULT 'pro'"),
     ]
     for table, col, typedef in _migrations:

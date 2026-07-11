@@ -1,9 +1,9 @@
-﻿# Author: Aarav Shah
+# Author: Aarav Shah
 # Portfolio: aaravshah1311.is-great.net
 # github: github.com/aaravshah1311
 
 """
-AP Bot â€” Configuration Module.
+AP Bot — Configuration Module.
 
 Centralizes all environment variable loading, constants, label definitions,
 and configuration validation for the AP Bot system.
@@ -37,7 +37,7 @@ PR_AUTHOR: Optional[str] = os.getenv("PR_AUTHOR")
 # API & Model Constants
 # ---------------------------------------------------------------------------
 GITHUB_API_BASE: str = "https://api.github.com"
-GEMINI_MODEL: str = "gemini-2.5-flash"
+GEMINI_MODEL: str = "gemini-2.5-flash-lite"
 STALE_DAYS: int = 180
 GRACE_PERIOD_DAYS: int = 7
 MAX_SUMMARY_LENGTH: int = 500
@@ -47,7 +47,7 @@ MAX_SUMMARY_LENGTH: int = 500
 # ---------------------------------------------------------------------------
 BOT_FOOTER: str = (
     "\n\n---\n"
-    "ðŸ¤– *This is an automated reply by **AP Automated Bot**. "
+    "🤖 *This is an automated reply by **AP Automated Bot**. "
     "It can make mistakes. Human maintainers have the final decision.*"
 )
 

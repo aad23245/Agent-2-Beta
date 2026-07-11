@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+# Author: Aarav Shah
+# Portfolio: aaravshah1311.is-great.net
+# github: github.com/aaravshah1311
+
 """
 Agent2 — Universal Launcher
 Platforms: Windows (CMD/PowerShell) | macOS | Linux

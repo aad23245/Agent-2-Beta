@@ -1,3 +1,7 @@
+# Author: Aarav Shah
+# Portfolio: aaravshah1311.is-great.net
+# github: github.com/aaravshah1311
+
 """
 agent2/terminal.py
 ──────────────────

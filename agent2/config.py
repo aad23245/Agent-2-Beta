@@ -1,3 +1,7 @@
+# Author: Aarav Shah
+# Portfolio: aaravshah1311.is-great.net
+# github: github.com/aaravshah1311
+
 """
 agent2/config.py
 ────────────────
@@ -55,14 +59,12 @@ def shell_argv(cmd: str) -> list[str]:
 
 # ── Models ─────────────────────────────────────────────────────────────────────
 MODELS: dict[str, dict] = {
-    "2.5-flash-lite": {"api": "gemini-2.5-flash-lite", "label": "2.5 Flash Lite", "group": "2.5"},
-    "2.5-flash":      {"api": "gemini-2.5-flash",      "label": "2.5 Flash",      "group": "2.5"},
+        "2.5-flash":      {"api": "gemini-2.5-flash",      "label": "2.5 Flash",      "group": "2.5"},
     "2.5-pro":        {"api": "gemini-2.5-pro",        "label": "2.5 Pro",        "group": "2.5"},
-    "3.1-flash-lite": {"api": "gemini-3.1-flash-lite", "label": "3.1 Flash Lite", "group": "3.1"},
     "3.1-flash":      {"api": "gemini-3.1-flash",      "label": "3.1 Flash",      "group": "3.1"},
     "3.1-pro":        {"api": "gemini-3.1-pro",        "label": "3.1 Pro",        "group": "3.1"},
 }
-DEFAULT_MODEL = "2.5-flash-lite"
+DEFAULT_MODEL = "2.5-flash"
 
 # ── Modes ──────────────────────────────────────────────────────────────────────
 MODES: dict[str, dict] = {

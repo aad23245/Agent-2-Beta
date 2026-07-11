@@ -1,9 +1,9 @@
-﻿# Author: Aarav Shah
+# Author: Aarav Shah
 # Portfolio: aaravshah1311.is-great.net
 # github: github.com/aaravshah1311
 
 """
-AP Bot â€” AI Code Review Module.
+AP Bot — AI Code Review Module.
 
 Uses Gemini AI to review pull request diffs for code quality, readability,
 best practices, potential bugs, maintainability, documentation gaps, and
@@ -12,7 +12,7 @@ actionable suggestions.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 from ..config import config
 from ..logger import logger
@@ -30,16 +30,16 @@ _MAX_DIFF_LENGTH: int = 10_000
 _CODE_REVIEW_PROMPT: str = (
     "You are an expert code reviewer for an open-source project.\n\n"
     "Review the following pull request diff and provide feedback on:\n\n"
-    "1. **Code Quality** â€” Are there any anti-patterns or code smells?\n"
-    "2. **Readability** â€” Is the code clear and well-structured?\n"
-    "3. **Best Practices** â€” Does it follow language conventions and "
+    "1. **Code Quality** — Are there any anti-patterns or code smells?\n"
+    "2. **Readability** — Is the code clear and well-structured?\n"
+    "3. **Best Practices** — Does it follow language conventions and "
     "project standards?\n"
-    "4. **Potential Bugs** â€” Are there any logic errors, edge cases, "
+    "4. **Potential Bugs** — Are there any logic errors, edge cases, "
     "or runtime issues?\n"
-    "5. **Maintainability** â€” Will this be easy to maintain and extend?\n"
-    "6. **Missing Documentation** â€” Are there missing docstrings, "
+    "5. **Maintainability** — Will this be easy to maintain and extend?\n"
+    "6. **Missing Documentation** — Are there missing docstrings, "
     "comments, or type hints?\n"
-    "7. **Suggestions** â€” Provide concrete, actionable improvements.\n\n"
+    "7. **Suggestions** — Provide concrete, actionable improvements.\n\n"
     "Format your review using Markdown with headers for each section. "
     "Be constructive, specific, and reference line numbers or file names "
     "where possible.\n\n"
@@ -54,7 +54,7 @@ _CODE_REVIEW_PROMPT: str = (
 # ---------------------------------------------------------------------------
 
 
-def run(github_api: "GitHubAPI", gemini_client: "GeminiClient") -> str | None:
+def run(github_api: GitHubAPI, gemini_client: GeminiClient) -> Optional[str]:
     """Perform an AI-powered code review on a pull request.
 
     Fetches the PR diff, sends it to Gemini for analysis, and posts
@@ -68,7 +68,7 @@ def run(github_api: "GitHubAPI", gemini_client: "GeminiClient") -> str | None:
     Returns:
         The review text that was posted, or ``None`` on failure.
     """
-    pr_number: int | None = config.PR_NUMBER
+    pr_number: Optional[int] = config.PR_NUMBER
     if not pr_number:
         logger.error("No PR_NUMBER found in config. Aborting AI code review.")
         return None
@@ -107,13 +107,13 @@ def run(github_api: "GitHubAPI", gemini_client: "GeminiClient") -> str | None:
         truncation_notice = ""
         if truncated:
             truncation_notice = (
-                "\n\n> âš ï¸ _The diff was truncated due to size. "
+                "\n\n> ⚠️ _The diff was truncated due to size. "
                 "This review covers only the first "
                 f"{_MAX_DIFF_LENGTH:,} characters of the diff._\n"
             )
 
         comment_body = (
-            f"ðŸ¤– **AI Code Review**\n\n"
+            f"🤖 **AI Code Review**\n\n"
             f"{review}"
             f"{truncation_notice}\n\n{config.BOT_FOOTER}"
         )

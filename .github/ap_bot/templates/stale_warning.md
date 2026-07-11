@@ -1,10 +1,10 @@
-﻿<!--
+<!--
 Author: Aarav Shah
 Portfolio: aaravshah1311.is-great.net
 github: github.com/aaravshah1311
 -->
 
-â° **Stale Issue Notice**
+⏰ **Stale Issue Notice**
 
 This issue has been automatically marked as **stale** because it has not had any activity in the last {stale_days} days.
 

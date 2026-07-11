@@ -1,4 +1,4 @@
-﻿# Author: Aarav Shah
+# Author: Aarav Shah
 # Portfolio: aaravshah1311.is-great.net
 # github: github.com/aaravshah1311
 
@@ -71,7 +71,7 @@
 # Priority
 - name: critical
   color: "b60205"
-  description: Critical priority â€” immediate attention required
+  description: Critical priority — immediate attention required
 - name: high-priority
   color: "d93f0b"
   description: High priority

@@ -1,9 +1,9 @@
-﻿# Author: Aarav Shah
+# Author: Aarav Shah
 # Portfolio: aaravshah1311.is-great.net
 # github: github.com/aaravshah1311
 
 """
-AP Bot â€” AI Summary Generator Module.
+AP Bot — AI Summary Generator Module.
 
 Uses Gemini AI to generate concise summaries for issues and pull requests
 whose body exceeds a configurable length threshold.
@@ -43,8 +43,8 @@ _SUMMARY_PROMPT: str = (
 
 
 def run(
-    github_api: "GitHubAPI",
-    gemini_client: "GeminiClient",
+    github_api: GitHubAPI,
+    gemini_client: GeminiClient,
     issue_number: Optional[int] = None,
     pr_number: Optional[int] = None,
 ) -> Optional[str]:
@@ -67,7 +67,7 @@ def run(
     """
     issue_number = issue_number or config.ISSUE_NUMBER
     pr_number = pr_number or config.PR_NUMBER
-    target_number: int | None = pr_number or issue_number
+    target_number: Optional[int] = pr_number or issue_number
     item_type: str = "pull request" if pr_number else "issue"
 
     if not target_number:
@@ -90,7 +90,7 @@ def run(
         if len(body) < _MIN_BODY_LENGTH:
             logger.info(
                 f"{item_type.title()} #{target_number} body is under "
-                f"{_MIN_BODY_LENGTH} chars â€” skipping summary."
+                f"{_MIN_BODY_LENGTH} chars — skipping summary."
             )
             return None
 
@@ -110,7 +110,7 @@ def run(
 
         # -- Post summary comment --------------------------------------------
         comment_body = (
-            f"ðŸ“ **AI Summary**\n\n"
+            f"📝 **AI Summary**\n\n"
             f"{summary}\n\n{config.BOT_FOOTER}"
         )
         github_api.add_comment(target_number, comment_body)

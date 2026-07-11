@@ -1,3 +1,7 @@
+# Author: Aarav Shah
+# Portfolio: aaravshah1311.is-great.net
+# github: github.com/aaravshah1311
+
 """
 agent2/agent.py
 ───────────────
@@ -331,7 +335,7 @@ def run_agent(
 
             hint = (
                 f"\n\n> Model `{api_model}` may not be available on your key tier. "
-                "Try **2.5 Flash Lite** or **2.5 Flash**."
+                "Try **2.5 Flash**."
                 if is_model_err else ""
             )
             msg = f"**API Error ({api_model}):** {es}{hint}"

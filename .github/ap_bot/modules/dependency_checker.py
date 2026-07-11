@@ -1,9 +1,9 @@
-﻿# Author: Aarav Shah
+# Author: Aarav Shah
 # Portfolio: aaravshah1311.is-great.net
 # github: github.com/aaravshah1311
 
 """
-AP Bot â€” Dependency Checker Module.
+AP Bot — Dependency Checker Module.
 
 Scans changed files in a pull request for package manager files,
 extracts dependency modifications, and uses Gemini AI to review them for
@@ -12,7 +12,8 @@ known vulnerabilities, licensing issues, or major updates.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, List
+import os
+from typing import TYPE_CHECKING, List, Optional
 
 from ..config import config
 from ..logger import logger
@@ -46,10 +47,10 @@ _DEPENDENCY_PROMPT: str = (
     "Dependency File Diff:\n"
     "{diff}\n\n"
     "Provide a concise markdown report summarizing any issues or warning flags. "
-    "Use âœ… for safe/routine upgrades, âš ï¸ for warnings (e.g. major version jumps), "
-    "and ðŸ”´ for high risk packages (vulnerable or typosquatting). "
+    "Use ✅ for safe/routine upgrades, ⚠️ for warnings (e.g. major version jumps), "
+    "and 🔴 for high risk packages (vulnerable or typosquatting). "
     "If everything looks perfect and clean, respond with exactly: "
-    "âœ… No dependency concerns or risky updates detected."
+    "✅ No dependency concerns or risky updates detected."
 )
 
 
@@ -58,7 +59,7 @@ _DEPENDENCY_PROMPT: str = (
 # ---------------------------------------------------------------------------
 
 
-def run(github_api: "GitHubAPI", gemini_client: "GeminiClient") -> None:
+def run(github_api: GitHubAPI, gemini_client: GeminiClient) -> None:
     """Analyze dependency changes in a pull request.
 
     Checks the files modified in a PR, retrieves the diff for any package
@@ -69,7 +70,7 @@ def run(github_api: "GitHubAPI", gemini_client: "GeminiClient") -> None:
         github_api: Authenticated GitHub API wrapper instance.
         gemini_client: Gemini AI client.
     """
-    pr_number: int | None = config.PR_NUMBER
+    pr_number: Optional[int] = config.PR_NUMBER
     if not pr_number:
         logger.error("No PR_NUMBER found in config. Aborting dependency checker.")
         return
@@ -116,7 +117,7 @@ def run(github_api: "GitHubAPI", gemini_client: "GeminiClient") -> None:
 
         # -- Post the review comment -----------------------------------------
         comment_body = (
-            f"ðŸ“¦ **AI Dependency Review**\n\n"
+            f"📦 **AI Dependency Review**\n\n"
             f"{response}\n\n"
             f"_Always verify dependency updates manually. Maintainers should "
             f"inspect version tags and package sources._\n\n{config.BOT_FOOTER}"
@@ -129,4 +130,3 @@ def run(github_api: "GitHubAPI", gemini_client: "GeminiClient") -> None:
         logger.exception(f"Failed to run dependency review on PR #{pr_number}.")
         raise
 
-import os

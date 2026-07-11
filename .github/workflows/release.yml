@@ -1,4 +1,4 @@
-﻿# Author: Aarav Shah
+# Author: Aarav Shah
 # Portfolio: aaravshah1311.is-great.net
 # github: github.com/aaravshah1311
 
@@ -12,10 +12,16 @@
 name: "Automated Release"
 
 on:
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: "Tag name to release, for example v1.0.0"
+        required: true
+        type: string
   push:
     tags:
       - "v*"
-
+      
 permissions:
   contents: write
 
@@ -44,7 +50,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          TAG_NAME: ${{ github.ref_name }}
+          TAG_NAME: ${{ github.ref_name || inputs.tag_name }}
           REPO_NAME: ${{ github.repository }}
 
       - name: Create GitHub Release
@@ -53,6 +59,7 @@ jobs:
           body_path: .github/ap_bot/cache/release_notes.md
           generate_release_notes: false
           draft: false
-          prerelease: ${{ contains(github.ref_name, '-') }}
+          tag_name: ${{ github.ref_name || inputs.tag_name }}
+          prerelease: ${{ contains(github.ref_name || inputs.tag_name, '-') }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

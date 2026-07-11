@@ -1,4 +1,4 @@
-﻿# Author: Aarav Shah
+# Author: Aarav Shah
 # Portfolio: aaravshah1311.is-great.net
 # github: github.com/aaravshah1311
 
@@ -14,4 +14,4 @@ You are an expert code reviewer. Review the following code changes from a GitHub
 Code Diff:
 {diff}
 
-Provide your review in markdown format with sections for each concern. Use âœ… for good practices and âš ï¸ for issues.
+Provide your review in markdown format with sections for each concern. Use ✅ for good practices and ⚠️ for issues.

@@ -1,4 +1,8 @@
-﻿# Local secrets
+# Author: Aarav Shah
+# Portfolio: aaravshah1311.is-great.net
+# github: github.com/aaravshah1311
+
+# Local secrets
 .env
 .env.*
 !.env.example

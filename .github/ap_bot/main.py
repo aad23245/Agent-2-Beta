@@ -1,9 +1,9 @@
-﻿# Author: Aarav Shah
+# Author: Aarav Shah
 # Portfolio: aaravshah1311.is-great.net
 # github: github.com/aaravshah1311
 
 """
-AP Bot â€” Entry Point Dispatcher.
+AP Bot — Entry Point Dispatcher.
 
 This module serves as the single entry point for all AP Bot operations.
 It parses the requested module name from ``sys.argv[1]``, initialises
@@ -155,7 +155,7 @@ def main() -> None:
         sys.exit(1)
 
     module_name: str = sys.argv[1].strip().lower()
-    logger.info("AP Bot dispatcher started â€” module: '%s'", module_name)
+    logger.info("AP Bot dispatcher started — module: '%s'", module_name)
 
     # ------------------------------------------------------------------
     # Validate required environment variables
@@ -184,7 +184,7 @@ def main() -> None:
         gemini_client = GeminiClient(api_key=GEMINI_API_KEY)
     else:
         logger.warning(
-            "GEMINI_API_KEY not set â€” Gemini features will be unavailable."
+            "GEMINI_API_KEY not set — Gemini features will be unavailable."
         )
 
     # ------------------------------------------------------------------
@@ -196,7 +196,7 @@ def main() -> None:
         sys.exit(1)
 
     try:
-        logger.info("Executing module '%s'â€¦", module_name)
+        logger.info("Executing module '%s'…", module_name)
         handler(github_api, gemini_client)  # type: ignore[arg-type]
         logger.info("Module '%s' completed successfully.", module_name)
     except Exception as exc:  # noqa: BLE001

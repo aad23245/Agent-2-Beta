@@ -1,3 +1,15 @@
+<!--
+Author: Aarav Shah
+Portfolio: aaravshah1311.is-great.net
+github: github.com/aaravshah1311
+-->
+
+<!--
+# Author: Aarav Shah
+# Portfolio: aaravshah1311.is-great.net
+# github: github.com/aaravshah1311
+-->
+
 <h1 align="center">⚡ Agent-2-Pro</h1>
 
 <p align="center">
@@ -55,7 +67,7 @@ Tell it to *build a full-stack SaaS app* — it designs the architecture, scaffo
 | 🧪 | **QA Mode** | Auto-generate unit tests, integration tests, and edge-case coverage |
 | 📁 | **Project Space** | Persistent project contexts with full history, file tree, and memory |
 | 🧠 | **Deep Memory** | Long-term cross-project memory with semantic search and priority scoring |
-| 🔧 | **Extended Tools** | Everything in Beta + advanced file diffing, patch application, git ops, docker |
+| 🔧 | **Extended Tools** | Everything in Beta + advanced file diffing, patch application, and git ops |
 | 📊 | **Pentest Reports** | Auto-generated markdown/HTML reports with CVEs, CVSS scores, and remediation |
 | 🔁 | **Self-Correction Loop** | Agent reviews its own output, identifies errors, and reruns until correct |
 | ⚙️ | **Multi-step Planning** | Visible step-by-step execution plan with progress tracking and rollback |
@@ -241,7 +253,7 @@ Every chat belongs to a workspace. The agent always knows your project path, det
 | `/help` | Show all commands |
 | `/addapi` | Add a Gemini API key to `.env` |
 | `/keys` | Show current API key status and usage |
-| `/model [name]` | Switch model (`2.5-flash-lite` · `2.5-flash` · `2.5-pro` · `3.1-*`) |
+| `/model [name]` | Switch model (`2.5-flash` · `2.5-flash` · `2.5-pro` · `3.1-*`) |
 | `/mode [name]` | Switch mode (`fast ⚡` · `pro ★` · `thinking 🧠`) |
 | `/clear` | Clear current conversation and start fresh |
 | `/history` | Show last 10 messages |
@@ -264,7 +276,7 @@ Every chat belongs to a workspace. The agent always knows your project path, det
 - [ ] `python run.py` completed without errors
 - [ ] Gemini API key saved to `.env`
 - [ ] Web UI → server starts at **http://localhost:1311**, first workspace created
-- [ ] CLI → prompt `you [no-ws|2.5-flash-lite|★]>` appears
+- [ ] CLI → prompt `you [no-ws|2.5-flash|★]>` appears
 
 ---
 
@@ -272,10 +284,9 @@ Every chat belongs to a workspace. The agent always knows your project path, det
 
 | Key | Model | Group |
 |-----|-------|-------|
-| `2.5-flash-lite` | Gemini 2.5 Flash Lite | 2.5 |
 | `2.5-flash` | Gemini 2.5 Flash | 2.5 |
 | `2.5-pro` | Gemini 2.5 Pro | 2.5 |
-| `3.1-flash-lite` | Gemini 3.1 Flash Lite | 3.1 |
+| `3.1-flash` | Gemini 3.1 Flash | 3.1 |
 | `3.1-flash` | Gemini 3.1 Flash | 3.1 |
 | `3.1-pro` | Gemini 3.1 Pro | 3.1 |
 
@@ -329,7 +340,7 @@ Supports: `nmap`, `nikto`, `gobuster`, `ffuf`, `sqlmap`, `hydra`, `metasploit`,
 |---------|----------|
 | `No API keys configured` | `python run.py --addapi` or type `/addapi` in the CLI |
 | Key quota exhausted | Keys rotate automatically. Add more: `python run.py --addapi` |
-| Model returns empty response | Switch to **2.5 Flash Lite**: `/model 2.5-flash-lite` |
+| Model returns empty response | Switch to **2.5 Flash**: `/model 2.5-flash` |
 | Terminal not showing output | Refresh the browser tab and reconnect |
 | `python` not found on Windows | Use `py run.py` or install from the Microsoft Store |
 | Port 1311 already in use | Change `port=1311` in `agent2web.py` to another port |
@@ -342,7 +353,7 @@ Supports: `nmap`, `nikto`, `gobuster`, `ffuf`, `sqlmap`, `hydra`, `metasploit`,
 
 ## 🏗️ Software Engineering Mode
 
-> *"Build a full-stack task management app with React frontend, FastAPI backend, PostgreSQL, JWT auth, and Docker."*
+> *"Build a full-stack task management app with React frontend, FastAPI backend, PostgreSQL, and JWT auth."*
 > — **One prompt. Agent-2-Pro delivers.**
 
 ### How it works
@@ -384,7 +395,7 @@ User Prompt
 
 ### Supported stacks (auto-detected)
 
-`React` · `Next.js` · `Vue` · `Svelte` · `FastAPI` · `Flask` · `Django` · `Express` · `NestJS` · `Go (Gin/Echo)` · `Rust (Actix)` · `PostgreSQL` · `MongoDB` · `Redis` · `Docker` · `Kubernetes` · and more.
+`React` · `Next.js` · `Vue` · `Svelte` · `FastAPI` · `Flask` · `Django` · `Express` · `NestJS` · `Go (Gin/Echo)` · `Rust (Actix)` · `PostgreSQL` · `MongoDB` · `Redis` ·  · `Kubernetes` · and more.
 
 ---
 
@@ -553,7 +564,6 @@ Available in `.md`, `.html`, and `.txt` formats.
 | **QA & Test Generation** | ❌ | ✅ |
 | **Project Space** | ❌ | ✅ |
 | **Git Operations** | ❌ | ✅ |
-| **Docker / Container Ops** | ❌ | ✅ |
 | **Pentest Report Generation** | ❌ | ✅ |
 | **Deep Web Research** | ❌ | ✅ |
 | **Priority Support** | ❌ | ✅ |

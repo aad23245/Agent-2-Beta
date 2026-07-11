@@ -1,10 +1,10 @@
-﻿<!--
+<!--
 Author: Aarav Shah
 Portfolio: aaravshah1311.is-great.net
 github: github.com/aaravshah1311
 -->
 
-ðŸ”’ **Issue Closed â€” Stale**
+🔒 **Issue Closed — Stale**
 
 This issue has been automatically closed due to inactivity. It was marked as stale {grace_days} days ago and received no further updates.
 

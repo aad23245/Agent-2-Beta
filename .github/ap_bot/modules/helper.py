@@ -1,9 +1,9 @@
-﻿# Author: Aarav Shah
+# Author: Aarav Shah
 # Portfolio: aaravshah1311.is-great.net
 # github: github.com/aaravshah1311
 
 """
-AP Bot â€” Helper Utilities Module.
+AP Bot — Helper Utilities Module.
 
 Contains common utility functions used across multiple AP Bot modules,
 such as text truncation, date parsing, and label format processing.
@@ -12,7 +12,7 @@ such as text truncation, date parsing, and label format processing.
 from __future__ import annotations
 
 from datetime import datetime, timezone
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING, List, Optional
 
 from ..config import LABELS
 from ..logger import logger
@@ -111,7 +111,7 @@ def days_since(date_string: str) -> int:
         return 0
 
 
-def run_scheduler(github_api: "GitHubAPI", gemini_client: "GeminiClient" | None = None) -> None:
+def run_scheduler(github_api: GitHubAPI, gemini_client: Optional[GeminiClient] = None) -> None:
     """Dispatch workflow-dispatch capable maintenance jobs.
 
     Args:

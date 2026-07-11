@@ -1,9 +1,9 @@
-﻿# Author: Aarav Shah
+# Author: Aarav Shah
 # Portfolio: aaravshah1311.is-great.net
 # github: github.com/aaravshah1311
 
 """
-AP Bot â€” GitHub REST API Wrapper.
+AP Bot — GitHub REST API Wrapper.
 
 Provides the ``GitHubAPI`` class which encapsulates all interactions with the
 GitHub REST API used by the AP Bot system.  Every method includes structured

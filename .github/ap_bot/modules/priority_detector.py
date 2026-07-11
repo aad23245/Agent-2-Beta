@@ -1,9 +1,9 @@
-﻿# Author: Aarav Shah
+# Author: Aarav Shah
 # Portfolio: aaravshah1311.is-great.net
 # github: github.com/aaravshah1311
 
 """
-AP Bot â€” AI Priority Detector Module.
+AP Bot — AI Priority Detector Module.
 
 Uses Gemini AI to analyze an issue's content, estimate its priority,
 apply the appropriate priority label, and explain the reasoning in a comment.
@@ -11,7 +11,7 @@ apply the appropriate priority label, and explain the reasoning in a comment.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 from ..config import config
 from ..logger import logger
@@ -55,7 +55,7 @@ _PRIORITY_PROMPT: str = (
 # ---------------------------------------------------------------------------
 
 
-def run(github_api: "GitHubAPI", gemini_client: "GeminiClient") -> str | None:
+def run(github_api: GitHubAPI, gemini_client: GeminiClient) -> Optional[str]:
     """Assess issue priority using Gemini AI and apply priority labels.
 
     Args:
@@ -65,7 +65,7 @@ def run(github_api: "GitHubAPI", gemini_client: "GeminiClient") -> str | None:
     Returns:
         The applied priority label, or None if failed.
     """
-    issue_number: int | None = config.ISSUE_NUMBER
+    issue_number: Optional[int] = config.ISSUE_NUMBER
     if not issue_number:
         logger.error("No ISSUE_NUMBER found in config. Aborting priority detection.")
         return None
@@ -95,7 +95,7 @@ def run(github_api: "GitHubAPI", gemini_client: "GeminiClient") -> str | None:
 
         # -- Post explanation comment ---------------------------------------
         comment_body = (
-            f"âš¡ **AI Priority Assessment**\n\n"
+            f"⚡ **AI Priority Assessment**\n\n"
             f"**Priority:** `{priority}`\n"
             f"**Justification:** {reason}\n\n"
             f"_Priority labels are advisory. Maintainers can adjust priority levels "
@@ -116,7 +116,7 @@ def run(github_api: "GitHubAPI", gemini_client: "GeminiClient") -> str | None:
 # ---------------------------------------------------------------------------
 
 
-def _parse_priority_response(raw_response: str) -> tuple[str | None, str]:
+def _parse_priority_response(raw_response: str) -> tuple[Optional[str], str]:
     """Parse priority and reason from Gemini's response.
 
     Expected format:
@@ -129,7 +129,7 @@ def _parse_priority_response(raw_response: str) -> tuple[str | None, str]:
     Returns:
         A tuple of (priority_label, reason_text).
     """
-    priority: str | None = None
+    priority: Optional[str] = None
     reason: str = "Triage based on initial issue description."
 
     for line in raw_response.strip().splitlines():

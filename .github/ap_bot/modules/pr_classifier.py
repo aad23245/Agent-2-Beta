@@ -1,9 +1,9 @@
-﻿# Author: Aarav Shah
+# Author: Aarav Shah
 # Portfolio: aaravshah1311.is-great.net
 # github: github.com/aaravshah1311
 
 """
-AP Bot â€” AI PR Classifier Module.
+AP Bot — AI PR Classifier Module.
 
 Uses Gemini AI to analyze a pull request's title, body, and changed files
 to classify it into one or more predefined categories, then applies the
@@ -12,7 +12,7 @@ corresponding labels and posts a summary comment.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 from ..config import config
 from ..logger import logger
@@ -55,7 +55,7 @@ _CLASSIFICATION_PROMPT: str = (
 # ---------------------------------------------------------------------------
 
 
-def run(github_api: "GitHubAPI", gemini_client: "GeminiClient") -> list[str]:
+def run(github_api: GitHubAPI, gemini_client: GeminiClient) -> list[str]:
     """Classify a pull request using Gemini AI and apply labels.
 
     Fetches the PR details and changed file list from the GitHub API,
@@ -69,7 +69,7 @@ def run(github_api: "GitHubAPI", gemini_client: "GeminiClient") -> list[str]:
     Returns:
         A list of label strings that were applied.
     """
-    pr_number: int | None = config.PR_NUMBER
+    pr_number: Optional[int] = config.PR_NUMBER
     if not pr_number:
         logger.error("No PR_NUMBER found in config. Aborting PR classification.")
         return []
@@ -107,7 +107,7 @@ def run(github_api: "GitHubAPI", gemini_client: "GeminiClient") -> list[str]:
         # -- Post summary comment --------------------------------------------
         label_list = ", ".join(f"`{lbl}`" for lbl in labels)
         comment_body = (
-            f"ðŸ·ï¸ **AI PR Classification**\n\n"
+            f"🏷️ **AI PR Classification**\n\n"
             f"This pull request has been automatically classified into the "
             f"following categories:\n\n{label_list}\n\n"
             f"_Labels have been applied accordingly. A maintainer will verify "

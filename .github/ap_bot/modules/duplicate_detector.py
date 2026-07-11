@@ -1,9 +1,9 @@
-﻿# Author: Aarav Shah
+# Author: Aarav Shah
 # Portfolio: aaravshah1311.is-great.net
 # github: github.com/aaravshah1311
 
 """
-AP Bot â€” Duplicate Issue Detector Module.
+AP Bot — Duplicate Issue Detector Module.
 
 Uses Gemini AI to compare a newly opened issue against recent open issues
 and flag potential duplicates with confidence scores.
@@ -11,7 +11,7 @@ and flag potential duplicates with confidence scores.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 from ..config import config
 from ..logger import logger
@@ -46,7 +46,7 @@ _DUPLICATE_PROMPT: str = (
 # ---------------------------------------------------------------------------
 
 
-def run(github_api: "GitHubAPI", gemini_client: "GeminiClient") -> list[dict]:
+def run(github_api: GitHubAPI, gemini_client: GeminiClient) -> list[dict]:
     """Detect potential duplicate issues using Gemini AI.
 
     Fetches the new issue and the most recent open issues from GitHub,
@@ -62,7 +62,7 @@ def run(github_api: "GitHubAPI", gemini_client: "GeminiClient") -> list[dict]:
         A list of dicts with keys ``issue_number``, ``confidence``, and
         ``reason`` for each detected duplicate.
     """
-    issue_number: int | None = config.ISSUE_NUMBER
+    issue_number: Optional[int] = config.ISSUE_NUMBER
     if not issue_number:
         logger.error("No ISSUE_NUMBER found in config. Aborting duplicate detection.")
         return []
@@ -120,12 +120,12 @@ def run(github_api: "GitHubAPI", gemini_client: "GeminiClient") -> list[dict]:
             logger.info(f"Added 'duplicate' label to issue #{issue_number}.")
 
             duplicate_lines = "\n".join(
-                f"- **#{d['issue_number']}** â€” Confidence: "
-                f"{d['confidence']:.0%} â€” {d['reason']}"
+                f"- **#{d['issue_number']}** — Confidence: "
+                f"{d['confidence']:.0%} — {d['reason']}"
                 for d in high_confidence
             )
             comment_body = (
-                f"ðŸ” **Potential Duplicate Detected**\n\n"
+                f"🔍 **Potential Duplicate Detected**\n\n"
                 f"This issue appears to be a duplicate of the following:\n\n"
                 f"{duplicate_lines}\n\n"
                 f"_Please review the linked issue(s) and close this one if "

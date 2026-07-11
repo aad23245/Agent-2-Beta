@@ -1,10 +1,11 @@
-﻿# Author: Aarav Shah
+# Author: Aarav Shah
 # Portfolio: aaravshah1311.is-great.net
 # github: github.com/aaravshah1311
 
 name: Python CI
 
 on:
+  workflow_dispatch:
   push:
     branches: [main]
   pull_request:

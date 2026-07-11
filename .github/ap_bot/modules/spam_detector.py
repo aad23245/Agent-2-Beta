@@ -1,19 +1,19 @@
-﻿# Author: Aarav Shah
+# Author: Aarav Shah
 # Portfolio: aaravshah1311.is-great.net
 # github: github.com/aaravshah1311
 
 """
-AP Bot â€” Spam Detector Module.
+AP Bot — Spam Detector Module.
 
 Uses Gemini AI to evaluate whether an issue or pull request is spam,
 promotional, nonsensical, or extremely low quality.  Flagged items
-receive a ``possible-spam`` label and a warning comment â€” they are
+receive a ``possible-spam`` label and a warning comment — they are
 **never** auto-closed.
 """
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 from ..config import config
 from ..logger import logger
@@ -47,7 +47,7 @@ _SPAM_PROMPT: str = (
 # ---------------------------------------------------------------------------
 
 
-def run(github_api: "GitHubAPI", gemini_client: "GeminiClient") -> bool:
+def run(github_api: GitHubAPI, gemini_client: GeminiClient) -> bool:
     """Evaluate an issue or PR for spam content.
 
     Sends the issue/PR content to Gemini for evaluation.  If flagged as
@@ -61,9 +61,9 @@ def run(github_api: "GitHubAPI", gemini_client: "GeminiClient") -> bool:
     Returns:
         ``True`` if the content was flagged as spam, ``False`` otherwise.
     """
-    issue_number: int | None = config.ISSUE_NUMBER
-    pr_number: int | None = config.PR_NUMBER
-    target_number: int | None = pr_number or issue_number
+    issue_number: Optional[int] = config.ISSUE_NUMBER
+    pr_number: Optional[int] = config.PR_NUMBER
+    target_number: Optional[int] = pr_number or issue_number
     target_type: str = "PR" if pr_number else "issue"
 
     if not target_number:
@@ -99,7 +99,7 @@ def run(github_api: "GitHubAPI", gemini_client: "GeminiClient") -> bool:
             )
 
             comment_body = (
-                f"âš ï¸ **Possible Spam Detected**\n\n"
+                f"⚠️ **Possible Spam Detected**\n\n"
                 f"This {target_type.lower()} has been automatically flagged "
                 f"as potential spam by our AI assistant.\n\n"
                 f"**Reason:** {reason}\n\n"

@@ -1,4 +1,4 @@
-﻿# Author: Aarav Shah
+# Author: Aarav Shah
 # Portfolio: aaravshah1311.is-great.net
 # github: github.com/aaravshah1311
 
@@ -10,9 +10,9 @@ Merged PRs:
 {pull_requests}
 
 Format the release notes with these sections (omit empty sections):
-## âœ¨ New Features
-## ðŸ› Bug Fixes
-## ðŸ”§ Improvements
-## âš ï¸ Breaking Changes
-## ðŸ“¦ Dependencies
-## ðŸ“ Documentation
+## ✨ New Features
+## 🐛 Bug Fixes
+## 🔧 Improvements
+## ⚠️ Breaking Changes
+## 📦 Dependencies
+## 📝 Documentation

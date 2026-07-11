@@ -1,13 +1,18 @@
-﻿# Author: Aarav Shah
+# Author: Aarav Shah
 # Portfolio: aaravshah1311.is-great.net
 # github: github.com/aaravshah1311
 
 name: AI Issue Review
 
 on:
+  workflow_dispatch:
+    inputs:
+      issue_number:
+        description: "Issue number to review"
+        required: true
+        type: number
   issues:
     types: [opened]
-
 permissions:
   issues: write
 
@@ -32,6 +37,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          ISSUE_NUMBER: ${{ github.event.issue.number || inputs.issue_number }}
           REPO_NAME: ${{ github.repository }}
         run: PYTHONPATH=.github python -m ap_bot.main issue_review

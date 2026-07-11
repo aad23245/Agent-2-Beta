@@ -1,9 +1,9 @@
-﻿# Author: Aarav Shah
+# Author: Aarav Shah
 # Portfolio: aaravshah1311.is-great.net
 # github: github.com/aaravshah1311
 
 """
-AP Bot â€” Stale Issue Manager Module.
+AP Bot — Stale Issue Manager Module.
 
 Identifies inactive issues, marks them as stale with a warning comment,
 and automatically closes them after a configured grace period if no activity occurs.
@@ -12,7 +12,7 @@ and automatically closes them after a configured grace period if no activity occ
 from __future__ import annotations
 
 from datetime import datetime, timezone
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING, List, Optional
 
 from ..config import config
 from ..logger import logger
@@ -27,7 +27,7 @@ if TYPE_CHECKING:
 # ---------------------------------------------------------------------------
 
 _STALE_WARNING: str = (
-    "â° **Stale Issue Notice**\n\n"
+    "⏰ **Stale Issue Notice**\n\n"
     "This issue has been automatically marked as **stale** because it has "
     "not had any activity in the last {stale_days} days.\n\n"
     "It will be **closed in {grace_days} days** if no further activity occurs.\n\n"
@@ -36,7 +36,7 @@ _STALE_WARNING: str = (
 )
 
 _STALE_CLOSE: str = (
-    "ðŸ”’ **Issue Closed â€” Stale**\n\n"
+    "🔒 **Issue Closed — Stale**\n\n"
     "This issue has been automatically closed due to inactivity. It was marked "
     "as stale {grace_days} days ago and received no further updates.\n\n"
     "If this issue is still relevant, please feel free to reopen it or create "
@@ -49,7 +49,7 @@ _STALE_CLOSE: str = (
 # ---------------------------------------------------------------------------
 
 
-def run(github_api: "GitHubAPI", gemini_client: "GeminiClient" | None = None) -> None:
+def run(github_api: GitHubAPI, gemini_client: Optional[GeminiClient] = None) -> None:
     """Identify issues with no activity and mark them as stale.
 
     Args:
@@ -94,7 +94,7 @@ def run(github_api: "GitHubAPI", gemini_client: "GeminiClient" | None = None) ->
 
 
 def auto_close(
-    github_api: "GitHubAPI", gemini_client: "GeminiClient" | None = None
+    github_api: GitHubAPI, gemini_client: Optional[GeminiClient] = None
 ) -> None:
     """Close stale issues that have exceeded the grace period.
 
@@ -141,7 +141,7 @@ def auto_close(
 # ---------------------------------------------------------------------------
 
 
-def _mark_as_stale(github_api: "GitHubAPI", issue_number: int) -> None:
+def _mark_as_stale(github_api: GitHubAPI, issue_number: int) -> None:
     """Add stale label and warning comment to an issue.
 
     Args:
@@ -160,7 +160,7 @@ def _mark_as_stale(github_api: "GitHubAPI", issue_number: int) -> None:
         raise
 
 
-def _close_stale_issue(github_api: "GitHubAPI", issue_number: int) -> None:
+def _close_stale_issue(github_api: GitHubAPI, issue_number: int) -> None:
     """Close a stale issue and post close comment.
 
     Args:

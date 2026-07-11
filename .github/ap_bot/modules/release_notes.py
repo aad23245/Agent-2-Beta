@@ -1,9 +1,9 @@
-﻿# Author: Aarav Shah
+# Author: Aarav Shah
 # Portfolio: aaravshah1311.is-great.net
 # github: github.com/aaravshah1311
 
 """
-AP Bot â€” Release Notes Generator Module.
+AP Bot — Release Notes Generator Module.
 
 Uses Gemini AI to compile recent merged pull requests into a structured,
 user-friendly release notes draft for a newly created repository release tag.
@@ -12,7 +12,7 @@ user-friendly release notes draft for a newly created repository release tag.
 from __future__ import annotations
 
 import os
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING, List, Optional
 
 from ..config import config
 from ..logger import logger
@@ -30,11 +30,11 @@ _RELEASE_NOTES_PROMPT: str = (
     "Create professional release notes for version tag **{tag}** based on "
     "the list of merged Pull Requests below.\n\n"
     "Group changes into these sections if applicable:\n"
-    "- âœ¨ New Features\n"
-    "- ðŸ› Bug Fixes\n"
-    "- ðŸ”§ Refactoring & Improvements\n"
-    "- âš ï¸ Breaking Changes\n"
-    "- ðŸ“¦ Dependency Updates\n\n"
+    "- ✨ New Features\n"
+    "- 🐛 Bug Fixes\n"
+    "- 🔧 Refactoring & Improvements\n"
+    "- ⚠️ Breaking Changes\n"
+    "- 📦 Dependency Updates\n\n"
     "For each PR, provide a one-line summary mentioning the PR number and the author.\n\n"
     "Merged Pull Requests:\n"
     "{pull_requests}\n\n"
@@ -47,14 +47,14 @@ _RELEASE_NOTES_PROMPT: str = (
 # ---------------------------------------------------------------------------
 
 
-def run(github_api: "GitHubAPI", gemini_client: "GeminiClient") -> None:
+def run(github_api: GitHubAPI, gemini_client: GeminiClient) -> None:
     """Generate release notes for a new version tag.
 
     Args:
         github_api: Authenticated GitHub API wrapper instance.
         gemini_client: Gemini AI client.
     """
-    tag: str | None = config.TAG_NAME
+    tag: Optional[str] = config.TAG_NAME
     if not tag:
         logger.error("No TAG_NAME found in config. Aborting release notes generation.")
         return

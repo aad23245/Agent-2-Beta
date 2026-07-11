@@ -1,9 +1,9 @@
-﻿# Author: Aarav Shah
+# Author: Aarav Shah
 # Portfolio: aaravshah1311.is-great.net
 # github: github.com/aaravshah1311
 
 """
-AP Bot â€” Documentation Checker Module.
+AP Bot — Documentation Checker Module.
 
 Validates that essential documentation files (like README, LICENSE,
 contributing guidelines, issue/PR templates) exist and are placed correctly.
@@ -12,7 +12,7 @@ contributing guidelines, issue/PR templates) exist and are placed correctly.
 from __future__ import annotations
 
 import os
-from typing import TYPE_CHECKING, Dict
+from typing import TYPE_CHECKING, Dict, Optional
 
 from ..config import config
 from ..logger import logger
@@ -40,7 +40,7 @@ REQUIRED_DOCS: Dict[str, str] = {
 # ---------------------------------------------------------------------------
 
 
-def run(github_api: "GitHubAPI", gemini_client: "GeminiClient" | None = None) -> None:
+def run(github_api: GitHubAPI, gemini_client: Optional[GeminiClient] = None) -> None:
     """Validate repository documentation and log/comment results.
 
     Checks the local filesystem for the required documentation files
@@ -76,7 +76,7 @@ def run(github_api: "GitHubAPI", gemini_client: "GeminiClient" | None = None) ->
         logger.info(f"Triggered by PR #{pr_number}. Posting report comment...")
         try:
             body = (
-                f"ðŸ“– **Repository Documentation Review**\n\n"
+                f"📖 **Repository Documentation Review**\n\n"
                 f"{report}\n\n"
                 f"_Please ensure that missing documentation files are created "
                 f"to help guide contributors._\n\n{config.BOT_FOOTER}"
@@ -110,7 +110,7 @@ def _generate_markdown_report(results: Dict[str, bool]) -> str:
     ]
     
     for path, exists in results.items():
-        status = "âœ… Found" if exists else "âŒ **Missing**"
+        status = "✅ Found" if exists else "❌ **Missing**"
         description = REQUIRED_DOCS[path]
         lines.append(f"| `{path}` | {status} | {description} |")
         
