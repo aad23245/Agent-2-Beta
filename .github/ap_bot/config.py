@@ -24,11 +24,36 @@ load_dotenv()
 # ---------------------------------------------------------------------------
 # Environment Variables
 # ---------------------------------------------------------------------------
+def _env_int(name: str) -> Optional[int]:
+    """Read an environment variable as a positive integer.
+
+    Returns ``None`` when the variable is unset, empty, non-numeric, or
+    not positive.  This keeps a malformed value (e.g. an empty string
+    injected by a GitHub Actions expression) from crashing the whole
+    bot at import time.
+
+    Args:
+        name: The environment variable name to read.
+
+    Returns:
+        The parsed integer, or ``None`` if it is missing or invalid.
+    """
+    raw = os.getenv(name)
+    if not raw:
+        return None
+    try:
+        value = int(raw)
+    except ValueError:
+        logger.warning("Environment variable '%s' is not an integer: %r", name, raw)
+        return None
+    return value or None
+
+
 GITHUB_TOKEN: Optional[str] = os.getenv("GITHUB_TOKEN")
 GEMINI_API_KEY: Optional[str] = os.getenv("GEMINI_API_KEY")
 REPO_NAME: Optional[str] = os.getenv("REPO_NAME") or os.getenv("GITHUB_REPOSITORY")
-ISSUE_NUMBER: Optional[int] = int(os.getenv("ISSUE_NUMBER", "0") or 0) or None
-PR_NUMBER: Optional[int] = int(os.getenv("PR_NUMBER", "0") or 0) or None
+ISSUE_NUMBER: Optional[int] = _env_int("ISSUE_NUMBER")
+PR_NUMBER: Optional[int] = _env_int("PR_NUMBER")
 EVENT_ACTION: Optional[str] = os.getenv("EVENT_ACTION")
 TAG_NAME: Optional[str] = os.getenv("TAG_NAME")
 PR_AUTHOR: Optional[str] = os.getenv("PR_AUTHOR")

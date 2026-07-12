@@ -70,6 +70,12 @@ def run(github_api: GitHubAPI, gemini_client: GeminiClient) -> list[dict]:
     try:
         # -- Fetch the new issue ---------------------------------------------
         new_issue = github_api.get_issue(issue_number)
+        if not new_issue:
+            logger.error(
+                f"Could not fetch issue #{issue_number}. "
+                f"Aborting duplicate detection."
+            )
+            return []
         new_title: str = new_issue.get("title", "")
         new_body: str = new_issue.get("body", "") or ""
 

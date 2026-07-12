@@ -223,6 +223,8 @@ HTML: str = r"""<!DOCTYPE html>
     <div class="mhd">
       <div class="mtabs">
         <div class="mtab active" onclick="switchMTab(this,'key-p');loadKeys()">API Keys</div>
+        <div class="mtab" onclick="switchMTab(this,'prov-p');loadProviders()">Providers</div>
+        <div class="mtab" onclick="switchMTab(this,'burp-p');loadBurp()">Burp</div>
         <div class="mtab" onclick="switchMTab(this,'usage-p');loadUsage()">Usage</div>
       </div>
       <button class="mclose" onclick="closeMod('settings')">×</button>
@@ -245,6 +247,46 @@ HTML: str = r"""<!DOCTYPE html>
         <div id="key-list"></div>
       </div>
       <div id="usage-p" class="mpanel"><div id="usage-list"></div></div>
+      <div id="prov-p" class="mpanel">
+        <div style="font-size:11px;color:var(--tx3);font-family:var(--mn);margin-bottom:10px">
+          Add any OpenAI- or Anthropic-compatible model (OpenRouter, DeepSeek, Groq, Together, Ollama, local, Claude…). It becomes selectable in the model dropdown.
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:8px">
+          <input type="text" id="pv-name"  placeholder="Name (e.g. AgentRouter GPT-5.5)" autocomplete="off">
+          <input type="text" id="pv-url"   placeholder="Base URL (e.g. https://openrouter.ai/api/v1)" autocomplete="off" spellcheck="false">
+          <input type="text" id="pv-model" placeholder="Model ID (e.g. gpt-5.5, deepseek/deepseek-chat)" autocomplete="off" spellcheck="false">
+          <input type="text" id="pv-ua" placeholder="User-Agent (optional, e.g. opencode/0.4.0)" autocomplete="off" spellcheck="false">
+          <div class="add-row" style="margin-bottom:0">
+            <select id="pv-fmt" onchange="pvFmtHint()" style="max-width:130px;flex:none;background:var(--bg2);color:var(--tx1);border:1px solid var(--bd);border-radius:6px;padding:7px">
+              <option value="openai">OpenAI format</option>
+              <option value="anthropic">Anthropic format</option>
+            </select>
+            <input type="password" id="pv-key" placeholder="API key" autocomplete="off" spellcheck="false">
+            <button class="add-btn" onclick="addProvider()">Add</button>
+          </div>
+        </div>
+        <div id="pv-hint" style="font-size:10px;color:var(--tx3);font-family:var(--mn);margin-bottom:12px;line-height:1.5">
+          <strong>OpenAI format</strong>: Base URL usually ends in <code>/v1</code> (e.g. <code>https://agentrouter.org/v1</code>).<br>
+          <strong>User-Agent</strong>: leave blank normally. Some gateways (e.g. AgentRouter) only accept an allowlisted client UA like <code>opencode/0.4.0</code>.
+        </div>
+        <div id="prov-list"></div>
+      </div>
+      <div id="burp-p" class="mpanel">
+        <div style="font-size:11px;color:var(--tx3);font-family:var(--mn);margin-bottom:10px">
+          Connect Agent 2 to a running <strong>Burp Suite</strong> (with the PortSwigger “MCP Server” extension enabled). Once connected, every Burp tool (proxy history, Repeater, Intruder, Scanner…) becomes available to the agent. Agent 2 does <strong>not</strong> connect until you click Connect below.
+        </div>
+        <div style="display:flex;gap:6px;margin-bottom:10px">
+          <input type="text" id="burp-url" placeholder="http://127.0.0.1:9876" autocomplete="off" spellcheck="false" style="flex:1">
+          <button class="add-btn" id="burp-connect-btn" onclick="burpConnect()">Connect</button>
+          <button class="add-btn" id="burp-disconnect-btn" onclick="burpDisconnect()" style="background:var(--rd)">Disconnect</button>
+        </div>
+        <label style="display:flex;align-items:center;gap:6px;font-size:11px;font-family:var(--mn);color:var(--tx2);cursor:pointer;margin-bottom:12px">
+          <input type="checkbox" id="burp-auto" onchange="burpToggleAuto(this.checked)" style="accent-color:var(--ac)">
+          Auto-connect on every agent turn (otherwise connect manually here)
+        </label>
+        <div id="burp-status" style="font-size:11px;font-family:var(--mn);color:var(--tx3)"></div>
+        <div id="burp-list" style="margin-top:10px"></div>
+      </div>
     </div>
   </div>
 </div>

@@ -169,7 +169,7 @@ const WATERMARK_SVG = `<svg viewBox="0 0 100 100" fill="none" xmlns="http://www.
 // ══════════════════════════════════════════════════════════════════
 const S = {
   chatId:null, chats:[], busy:false, tokens:{},
-  os:'...', shell:'...', models:{}, modes:{},
+  os:'...', shell:'...', models:{}, modes:{}, providers:[],
   curModel:'', curMode:'',
   activeTermId:null, terms:{},
   attachments:[],
@@ -196,6 +196,7 @@ socket.on('connected', d => {
   S.curModel=d.default_model; S.curMode=d.default_mode;
   document.getElementById('shell-badge').textContent = S.shell;
   buildSelectors();
+  refreshProviders();
   setWelcomeChips();
 });
 socket.on('toast', d => toast(d.msg, d.type||'info'));
@@ -240,7 +241,8 @@ socket.on('proc_ended', d => {
   setTermRunning(d.term_id,false);
   document.getElementById('kill-btn').classList.remove('show');
 });
-socket.on('chat_tool_call', d => appendToolCall(d.description,d.command,d.shell||S.shell));
+socket.on('chat_tool_call', d => appendToolCall(d.description,d.command,d.shell||S.shell,d.tool));
+socket.on('chat_tool_result', d => appendToolResult(d.tool,d.summary,d.ok));
 socket.on('chat_response', d => { removeTyping(); if(d.text)appendAI(d.text); if(d.done){setBusy(false);setStatus('ready','Ready');} });
 socket.on('agent_stopped', () => { removeTyping(); setBusy(false); setStatus('ready','Ready'); });
 socket.on('messages_truncated', async d => {
@@ -266,6 +268,11 @@ function buildSelectors(){
   for(const[g,items] of Object.entries(groups)){
     const og=document.createElement('optgroup'); og.label='Gemini '+g;
     for(const{k,m} of items){const o=document.createElement('option');o.value=k;o.textContent=m.label;if(k===S.curModel)o.selected=true;og.appendChild(o);}
+    msel.appendChild(og);
+  }
+  if(S.providers&&S.providers.length){
+    const og=document.createElement('optgroup'); og.label='Custom Providers';
+    for(const p of S.providers){const o=document.createElement('option');o.value=p.key;o.textContent=(p.name||p.model_id)+' ['+p.format+']';if(p.key===S.curModel)o.selected=true;og.appendChild(o);}
     msel.appendChild(og);
   }
   mosel.innerHTML='';
@@ -425,7 +432,20 @@ function renderMsgs(msgs){
   for(const m of msgs){
     if(m.role==='user') _user(m.content,JSON.parse(m.meta||'{}'),m.id);
     else if(m.role==='assistant') _ai(m.content);
-    else if(m.role==='tool_call'){const meta=JSON.parse(m.meta||'{}');_tool(m.content,meta.cmd||'',S.shell);}
+    else if(m.role==='tool_call'){
+      const meta=JSON.parse(m.meta||'{}');
+      const fn=meta.burp||meta.local||(meta.args&&meta.args.command!==undefined?'run_command':'run_command');
+      _tool(m.content,meta.cmd||(meta.args&&meta.args.command)||'',meta.burp?'Burp MCP':(fn==='run_command'?S.shell:'tool'),fn);
+    }
+    else if(m.role==='tool_result'){
+      const meta=JSON.parse(m.meta||'{}');
+      const fn=meta.burp||meta.local||'run_command';
+      // Shell (run_command) output belongs in the terminal, not the chat log.
+      if(fn!=='run_command'){
+        const ok=meta.ok!==undefined?meta.ok:(meta.rc!==undefined?meta.rc===0:true);
+        appendToolResult(fn,m.content,ok);
+      }
+    }
   }
   scrollB();
 }
@@ -568,15 +588,23 @@ async function retryLast() {
   toast('Regenerating response...', 'info');
 }
 
-function _tool(desc,cmd,shell){
+function _tool(desc,cmd,shell,toolName){
   hideWel();
   const id='tc'+_ti++;
+  const fn=toolName||'run_command';
+  const isShell=(fn==='run_command');
   const el=document.createElement('div');el.className='mrow mt';
-  el.innerHTML=`<div class="mrow-head"><span class="mbadge mbt">TOOL</span><span class="mshell">${shell}</span><span class="mtime">${ts()}</span></div>
+  const body=isShell
+    ? `<div class="tbody" id="${id}"><div class="tlbl">Command</div><div class="tcmd" id="cmd-${id}">$ ${esc(cmd)}</div></div>`
+    : `<div class="tbody" id="${id}"><div class="tlbl">Call</div><div class="tcmd" id="cmd-${id}">${esc(cmd||fn+'(…)')}</div></div>`;
+  const actions=isShell
+    ? `<span class="tshbg">${shell}</span><button class="tcopy" onclick="event.stopPropagation();cpCmd('${id}')">copy</button><button class="trun-btn" onclick="event.stopPropagation();runToolCmd('${id}')">▶ run</button>`
+    : `<span class="tshbg">${esc(shell||'tool')}</span>`;
+  el.innerHTML=`<div class="mrow-head"><span class="mbadge mbt">TOOL</span><span class="mshell">${esc(shell||'')}</span><span class="mtime">${ts()}</span></div>
     <div class="tblk"><div class="tblk-hd" onclick="togTool('${id}')">
-      <div class="tblk-l"><span class="tarr" id="arr-${id}">&#9654;</span><span class="tfn">run_command</span><span class="tdesc">${esc(desc)}</span></div>
-      <div style="display:flex;align-items:center;gap:5px"><span class="tshbg">${shell}</span><button class="tcopy" onclick="event.stopPropagation();cpCmd('${id}')">copy</button><button class="trun-btn" onclick="event.stopPropagation();runToolCmd('${id}')">▶ run</button></div>
-    </div><div class="tbody" id="${id}"><div class="tlbl">Command</div><div class="tcmd" id="cmd-${id}">$ ${esc(cmd)}</div></div></div>`;
+      <div class="tblk-l"><span class="tarr" id="arr-${id}">&#9654;</span><span class="tfn">${esc(fn)}</span><span class="tdesc">${esc(desc)}</span></div>
+      <div style="display:flex;align-items:center;gap:5px">${actions}</div>
+    </div>${body}</div>`;
   msgsEl().appendChild(el); scrollB(); togTool(id);
 }
 function togTool(id){ const b=document.getElementById(id),a=document.getElementById('arr-'+id); if(!b)return; const o=b.classList.toggle('open'); if(a){a.innerHTML=o?'&#9660;':'&#9654;';a.classList.toggle('open',o);} }
@@ -601,7 +629,16 @@ function runToolCmd(id){
 function showTyping(){ hideWel(); const el=document.createElement('div');el.id='typing';el.className='mrow ma';el.innerHTML=`<div class="mrow-head"><span class="mbadge mbr">REASONING</span></div><div class="typing"><span></span><span></span><span></span></div>`;msgsEl().appendChild(el);scrollB(); }
 function removeTyping(){ const t=document.getElementById('typing'); if(t)t.remove(); }
 function appendAI(t){ _ai(t); }
-function appendToolCall(desc,cmd,shell){ _tool(desc,cmd,shell||S.shell); }
+function appendToolCall(desc,cmd,shell,toolName){ _tool(desc,cmd,shell||S.shell,toolName); }
+function appendToolResult(tool,summary,ok){
+  if(!summary) return;
+  hideWel();
+  const el=document.createElement('div');el.className='mrow mt';
+  const cls=ok?'tres-ok':'tres-err';
+  const sym=ok?'✓':'✗';
+  el.innerHTML=`<div class="tres ${cls}"><div class="tres-hd"><span class="tres-sym">${sym}</span><span class="tres-fn">${esc(tool||'tool')}</span></div><pre class="tres-body">${esc(String(summary).slice(0,4000))}</pre></div>`;
+  msgsEl().appendChild(el); scrollB();
+}
 
 // ══════════════════════════════════════════════════════════════════
 // SEND
@@ -846,6 +883,103 @@ async function rstKey(l){ await fetch(`/api/keys/${l}/reset`,{method:'POST'}); l
 async function pinKey(label,pin){
   await fetch(`/api/keys/${label}/pin`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pin})});
   loadKeys(); toast(pin?`Pinned to Key #${label}`:'Auto-rotate enabled','success');
+}
+
+// ── Custom providers ──────────────────────────────────────────────
+async function refreshProviders(){
+  try{ S.providers = await(await fetch('/api/providers')).json(); }catch(e){ S.providers=[]; }
+  buildSelectors();
+}
+async function loadProviders(){
+  await refreshProviders();
+  const box=document.getElementById('prov-list'); if(!box) return;
+  if(!S.providers.length){ box.innerHTML='<div style="font-size:11px;color:var(--tx3);font-family:var(--mn);padding:6px">No custom providers yet.</div>'; return; }
+  box.innerHTML=S.providers.map(p=>`
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px;border:1px solid var(--bd);border-radius:8px;margin-bottom:6px">
+      <div style="min-width:0">
+        <div style="font-size:12px;color:var(--tx1);font-weight:600">${esc(p.name||p.model_id)}</div>
+        <div style="font-size:10px;color:var(--tx3);font-family:var(--mn)">${esc(p.format)} · ${esc(p.model_id)} · ${esc(p.api_key)}</div>
+      </div>
+      <div style="display:flex;gap:6px;flex:none">
+        <button class="add-btn" style="padding:4px 8px" onclick="testProvider('${p.id}')">Test</button>
+        <button class="add-btn" style="padding:4px 8px;background:var(--bg2)" onclick="delProvider('${p.id}')">✕</button>
+      </div>
+    </div>`).join('');
+}
+function pvFmtHint(){
+  const fmt=document.getElementById('pv-fmt').value;
+  const el=document.getElementById('pv-hint'); if(!el) return;
+  if(fmt==='anthropic'){
+    el.innerHTML='<strong>Anthropic format</strong>: Base URL is the <em>bare host</em> — NO <code>/v1</code> (e.g. <code>https://agentrouter.org</code>). Agent 2 appends <code>/v1/messages</code>.';
+  } else {
+    el.innerHTML='<strong>OpenAI format</strong>: Base URL usually ends in <code>/v1</code> (e.g. <code>https://agentrouter.org/v1</code>). Agent 2 appends <code>/chat/completions</code>.';
+  }
+}
+async function addProvider(){
+  const name=document.getElementById('pv-name').value.trim();
+  const base_url=document.getElementById('pv-url').value.trim();
+  const model_id=document.getElementById('pv-model').value.trim();
+  const format=document.getElementById('pv-fmt').value;
+  const api_key=document.getElementById('pv-key').value.trim();
+  const user_agent=document.getElementById('pv-ua').value.trim();
+  if(!base_url||!model_id||!api_key){toast('Base URL, Model ID and API key are required','warning');return;}
+  const d=await(await fetch('/api/providers',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,base_url,model_id,format,api_key,user_agent})})).json();
+  if(d.ok){document.getElementById('pv-name').value='';document.getElementById('pv-url').value='';document.getElementById('pv-model').value='';document.getElementById('pv-key').value='';document.getElementById('pv-ua').value='';S.providers=d.providers||[];buildSelectors();loadProviders();toast('Provider added — pick it in the model dropdown','success');}
+  else toast(d.error||'Failed to add provider','error');
+}
+async function delProvider(id){
+  const d=await(await fetch('/api/providers/'+id,{method:'DELETE'})).json();
+  S.providers=d.providers||[]; buildSelectors(); loadProviders(); toast('Provider removed','success');
+}
+async function testProvider(id){
+  toast('Testing…','info');
+  const d=await(await fetch('/api/providers/'+id+'/test',{method:'POST'})).json();
+  if(d.ok) toast('OK — '+(d.text||'connected'),'success');
+  else toast('Test failed: '+(d.error||'error'),'error');
+}
+// ── Burp Suite MCP bridge ──────────────────────────────────────────
+function renderBurp(st){
+  if(!st) return;
+  const auto=document.getElementById('burp-auto'); if(auto) auto.checked=!!st.enabled;
+  const url=document.getElementById('burp-url');
+  if(url && !url.value) url.placeholder=st.url||'http://127.0.0.1:9876';
+  const stat=document.getElementById('burp-status');
+  if(stat){
+    const dot=st.connected?'#3ddc84':'#ff5555';
+    const state=st.connected?'connected':'disconnected';
+    let extra=st.connected?` · ${st.tool_count} tool(s)`:'';
+    if(!st.mcp_installed) extra=' · <span style="color:#ff5555">mcp package not installed</span>';
+    else if(!st.connected && st.last_error) extra=` · <span style="color:#f0c060">${esc(st.last_error)}</span>`;
+    stat.innerHTML=`<span style="color:${dot}">●</span> ${state} <span style="color:var(--tx3)">(${esc(st.url||'')})</span>${extra}`;
+  }
+  const box=document.getElementById('burp-list');
+  if(box){
+    if(st.connected && st.tools && st.tools.length){
+      box.innerHTML='<div style="display:flex;flex-wrap:wrap;gap:4px">'+
+        st.tools.map(t=>`<span style="font-size:10px;font-family:var(--mn);background:var(--bg2);border:1px solid var(--bd);border-radius:5px;padding:2px 6px;color:var(--tx2)">${esc(t)}</span>`).join('')+'</div>';
+    } else box.innerHTML='';
+  }
+}
+async function loadBurp(){
+  try{ renderBurp(await(await fetch('/api/burp')).json()); }
+  catch(e){ const s=document.getElementById('burp-status'); if(s) s.textContent='Failed to load Burp status.'; }
+}
+async function burpConnect(){
+  const url=document.getElementById('burp-url').value.trim();
+  toast('Connecting to Burp…','info');
+  const d=await(await fetch('/api/burp/connect',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url})})).json();
+  renderBurp(d.status);
+  toast(d.message||(d.ok?'Connected':'Failed'), d.ok?'success':'error');
+}
+async function burpDisconnect(){
+  const d=await(await fetch('/api/burp/disconnect',{method:'POST'})).json();
+  renderBurp(d.status); toast('Disconnected from Burp','info');
+}
+async function burpToggleAuto(on){
+  const d=await(await fetch('/api/burp/auto',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({enabled:on})})).json();
+  renderBurp(d.status);
+  toast(on?'Auto-connect ON — Burp connects each turn':'Auto-connect OFF — connect manually','info');
+  if(on) burpConnect();
 }
 async function loadUsage(){
   const keys=await(await fetch('/api/keys')).json();

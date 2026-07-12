@@ -55,15 +55,15 @@ def sync_labels(github_api: GitHubAPI) -> None:
             color = color_with_hash.lstrip("#")
             
             logger.info(f"Checking/Creating label: '{name}' with color '{color}'")
-            
-            # We can use github_api.session directly or wrap label creation.
+
             # GitHub API endpoint: POST /repos/{owner}/{repo}/labels
             # Body: { name, color, description }
-            url = f"{github_api.base_url}/repos/{github_api.repo}/labels"
+            # NB: github_api.base_url already includes '/repos/{owner}/{repo}'.
+            url = f"{github_api.base_url}/labels"
             data = {
                 "name": name,
                 "color": color,
-                "description": f"Managed by AP Automated Bot"
+                "description": "Managed by AP Automated Bot",
             }
             
             response = github_api.session.post(url, json=data)

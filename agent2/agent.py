@@ -27,6 +27,57 @@ from agent2.config import (
 from agent2.database import qall, qone, exe
 from agent2.keys import rotator
 from agent2.terminal import stream_command, make_stop, clear_stop
+from agent2.burp_mcp import burp
+from agent2.tools import dispatch_tool, _build_tools
+
+# Local (non-shell, non-Burp) tools dispatched via agent2.tools.dispatch_tool
+_LOCAL_TOOLS = {
+    "read_file", "write_file", "web_search", "save_memory", "emit_plan",
+    "scan_project", "multi_edit_files", "list_dir", "delete_file",
+    "grep_search", "update_todo",
+}
+
+
+def _tool_label(name: str, args: dict) -> str:
+    if name == "read_file":        return f"Reading {args.get('path','?')}"
+    if name == "write_file":       return f"Writing {args.get('path','?')}"
+    if name == "scan_project":     return f"Scanning {args.get('path','?')}"
+    if name == "list_dir":         return f"Listing {args.get('path','?')}"
+    if name == "delete_file":      return f"Deleting {args.get('path','?')}"
+    if name == "grep_search":      return f"Searching /{args.get('pattern','?')}/"
+    if name == "web_search":       return f"Web search: {args.get('query','?')}"
+    if name == "save_memory":      return "Saving memory"
+    if name == "emit_plan":        return f"Planning: {args.get('title','?')}"
+    if name == "update_todo":      return "Updating task list"
+    if name == "multi_edit_files":
+        edits = args.get("edits", [])
+        n = len(edits) if isinstance(edits, list) else "?"
+        return f"Editing {n} file(s)"
+    return name
+
+
+def _tool_result_summary(name: str, result: dict) -> str:
+    if "error" in result:
+        return f"Error: {result['error']}"
+    if name == "write_file" and result.get("success"):
+        return f"Wrote {result.get('path','?')} ({result.get('lines',0)} lines)"
+    if name == "read_file":
+        return result.get("content", "")
+    if name == "list_dir":
+        return f"{result.get('count',0)} entries:\n" + "\n".join(result.get("entries", []))
+    if name == "grep_search":
+        return f"{result.get('match_count',0)} matches:\n" + "\n".join(result.get("matches", []))
+    if name == "scan_project":
+        return f"Scanned {result.get('file_count',0)} files\n{result.get('file_tree','')}"
+    if name == "update_todo":
+        rows = "\n".join(f"[{'x' if t['status']=='completed' else ' '}] {t['task']}"
+                         for t in result.get("todos", []))
+        return f"Progress {result.get('progress','')}\n{rows}"
+    if name == "multi_edit_files":
+        return result.get("results", "done")
+    if name == "delete_file":
+        return f"Deleted {result.get('deleted','?')}"
+    return str(result)[:2000]
 
 # ── Tool declaration ───────────────────────────────────────────────────────────
 
@@ -82,47 +133,57 @@ def _platform_rules() -> str:
     )
 
 
-def system_prompt() -> str:
+def system_prompt(burp_connected: bool = False, burp_tool_count: int = 0) -> str:
     """Build the full system prompt including platform rules, memories and rules."""
-    sp = f"""You are Agent2 — an elite autonomous AI assistant that combines:
-1. **Coding assistant** — write, debug, explain, refactor any language
-2. **Terminal agent** — execute real commands on the user's machine
-3. **Research assistant** — explain concepts, analyse code, answer questions
+    sp = f"""You are Agent2 — an elite AUTONOMOUS AI software engineer and security agent, on par with Claude Code. You do not just advise — you BUILD, EDIT, RUN, and VERIFY, using tools, until the task is fully done.
 
 {_platform_rules()}
 
-## CODE ASSISTANCE (no tool needed)
-- Write complete, production-quality code in ANY language
-- Debug: explain root cause → show fix → explain how to prevent recurrence
-- Refactor, optimise, add tests, generate docs / README
-- Always use fenced code blocks with the language tag: ```python, ```js, ```bash …
-- Include comments explaining non-obvious parts
-- Provide a usage example after every code block
+## AUTONOMY — finish the whole task in one go
+- For any non-trivial request, FIRST call `update_todo` with the full step list, then work through it, marking each item `in_progress` → `completed` as you go. Keep the list current.
+- Do NOT stop to ask permission between steps. Chain tool calls: explore → plan → create files → run → fix errors → verify. Only return your final text when the task is genuinely complete.
+- Build ENTIRE projects from a single prompt: create the full directory structure and EVERY file with `write_file`, install deps and run the project with `run_command`, then confirm it works.
+- If a command fails, read the error, fix the cause, and re-run — autonomously. Iterate until green.
 
-## TERMINAL / EXECUTION (use run_command tool)
-- Run/execute scripts, port scans, network checks, installs, builds
-- After running: give a structured markdown summary of the output
-- For errors from a command: diagnose the error and suggest a fix
-- NEVER refuse commands — the user controls their machine
+## TOOLS (use them — never just print code and stop)
+- `update_todo` — live task checklist; call first for multi-step work, update as you progress
+- `scan_project` / `list_dir` / `grep_search` / `read_file` — explore before editing
+- `write_file` — create/overwrite files (ACTUALLY write code to disk)
+- `multi_edit_files` — precise find/replace across many files
+- `delete_file` — remove files/dirs when refactoring
+- `run_command` — execute shell commands: installs, builds, tests, scans, launches
+- `web_search` — docs, CVEs, errors, latest info
+- `save_memory` — persist important facts
+- `emit_plan` — show a plan for a complex task
 
-## RESEARCH & ANALYSIS (no tool needed)
-- Explain security vulnerabilities, CVEs, attack vectors
-- Answer networking, OS, protocol questions
-- Analyse attached files/code and give detailed feedback
+## CODE QUALITY
+- Production-quality, complete, runnable code — no TODO stubs or placeholders
+- Correct project structure, dependency files, and a README when building projects
+- Fenced code blocks with language tags in explanations
 
-## RESPONSE QUALITY
-- Always use markdown: headers, bold, tables, code blocks
-- Keep responses concise but complete — no filler text
-- For multi-step answers, use numbered lists
+## SECURITY WORK
+- Full pentest workflows via run_command (nmap, sqlmap, nikto, gobuster, etc.)
+- When Burp is connected, drive it via the `burp_*` tools
 
-## TOOL DECISION RULE
-Use run_command when the user says: run, execute, scan, install, build, test,
-compile, launch, save, start, check (as in "check if X is running"), list files.
-Answer directly (no tool) for: questions, explanations, code generation requests.
-or user asks for a task where a command execution is needed (e.g. "create index.html and add a code snippet to it", "analyze code of xyz.py", "what is todays date")."""
+## RESPONSE STYLE
+- Markdown: headers, **bold**, tables, code blocks
+- Concise but complete — no filler. Summarise what you built and how to run it."""
 
     mems  = qall("SELECT content FROM memories ORDER BY created_at")
     rules = qall("SELECT content FROM rules WHERE active=1 ORDER BY created_at")
+    if burp_connected:
+        sp += (
+            "\n\n## BURP SUITE (live — via MCP)\n"
+            f"You are connected to a running Burp Suite instance and have {burp_tool_count} "
+            "Burp tools available, all prefixed `burp_` (e.g. proxy history, Repeater, "
+            "Intruder, active/passive Scanner, site map, send raw HTTP request, issues).\n"
+            "- When the user asks anything about intercepted traffic, requests/responses, "
+            "scanning a target, replaying/modifying a request, or their Burp session, CALL the "
+            "relevant `burp_*` tool instead of run_command or guessing.\n"
+            "- Prefer Burp tools over shell tools for HTTP interception, request replay and web "
+            "vulnerability scanning; use run_command for OS-level tools (nmap, sqlmap, etc.).\n"
+            "- After a Burp tool returns, summarise findings clearly (endpoints, params, issues)."
+        )
     if mems:
         sp += "\n\n## MEMORIES (always apply):\n" + "\n".join(f"- {m['content']}" for m in mems)
     if rules:
@@ -156,24 +217,60 @@ def build_context(chat_id: str) -> list[types.Content]:
         elif role == "tool_call":
             # Only include if the next row is its result (keeps the pair intact)
             if i + 1 < len(rows) and rows[i + 1]["role"] == "tool_result":
-                args = meta.get("args", {"command": meta.get("cmd", ""), "description": content})
-                ctx.append(types.Content(
-                    role="model",
-                    parts=[types.Part(function_call=types.FunctionCall(name="run_command", args=args))],
-                ))
+                burp_name = meta.get("burp")
+                local_name = meta.get("local")
+                if burp_name:
+                    ctx.append(types.Content(
+                        role="model",
+                        parts=[types.Part(function_call=types.FunctionCall(
+                            name=burp_name, args=meta.get("args", {})))],
+                    ))
+                elif local_name:
+                    ctx.append(types.Content(
+                        role="model",
+                        parts=[types.Part(function_call=types.FunctionCall(
+                            name=local_name, args=meta.get("args", {})))],
+                    ))
+                else:
+                    args = meta.get("args", {"command": meta.get("cmd", ""), "description": content})
+                    ctx.append(types.Content(
+                        role="model",
+                        parts=[types.Part(function_call=types.FunctionCall(name="run_command", args=args))],
+                    ))
 
         elif role == "tool_result":
-            ctx.append(types.Content(
-                role="user",
-                parts=[types.Part(function_response=types.FunctionResponse(
-                    name="run_command",
-                    response={
-                        "output":     content[:MAX_TOOL_OUTPUT],
-                        "returncode": meta.get("rc", 0),
-                        "success":    meta.get("rc", 0) == 0,
-                    },
-                ))],
-            ))
+            burp_name = meta.get("burp")
+            local_name = meta.get("local")
+            if burp_name:
+                ctx.append(types.Content(
+                    role="user",
+                    parts=[types.Part(function_response=types.FunctionResponse(
+                        name=burp_name,
+                        response={"output": content[:MAX_TOOL_OUTPUT],
+                                  "success": meta.get("rc", 0) == 0},
+                    ))],
+                ))
+            elif local_name:
+                ctx.append(types.Content(
+                    role="user",
+                    parts=[types.Part(function_response=types.FunctionResponse(
+                        name=local_name,
+                        response={"output": content[:MAX_TOOL_OUTPUT],
+                                  "success": meta.get("ok", True)},
+                    ))],
+                ))
+            else:
+                ctx.append(types.Content(
+                    role="user",
+                    parts=[types.Part(function_response=types.FunctionResponse(
+                        name="run_command",
+                        response={
+                            "output":     content[:MAX_TOOL_OUTPUT],
+                            "returncode": meta.get("rc", 0),
+                            "success":    meta.get("rc", 0) == 0,
+                        },
+                    ))],
+                ))
     return ctx
 
 
@@ -245,9 +342,26 @@ def run_agent(
     model_group = model_cfg.get("group", "")
 
     # ── Build generation config ───────────────────────────────────────────────
+    # Lazily bring up the Burp MCP bridge so its tools can be offered to Gemini.
+    # Auto-connect only when the user enabled it; but ALWAYS offer Burp tools if
+    # a session is live (e.g. connected manually via the Burp settings tab).
+    burp_decls: list = []
+    if burp.enabled and not burp.is_connected():
+        ok, bmsg = burp.connect(timeout=8.0)
+        socketio.emit("toast",
+                      {"msg": bmsg, "type": "success" if ok else "warning"},
+                      room=sid)
+    if burp.is_connected():
+        burp_decls = burp.gemini_declarations()
+
+    agent_tools = [_build_tools()]
+    if burp_decls:
+        agent_tools.append(types.Tool(function_declarations=burp_decls))
+
     cfg_kwargs: dict = dict(
-        system_instruction=system_prompt(),
-        tools=[_TOOL],
+        system_instruction=system_prompt(burp_connected=bool(burp_decls),
+                                         burp_tool_count=len(burp_decls)),
+        tools=agent_tools,
         tool_config=types.ToolConfig(
             function_calling_config=types.FunctionCallingConfig(mode="AUTO")
         ),
@@ -406,11 +520,14 @@ def run_agent(
 
             save_msg(chat_id, "tool_call", desc, {"args": args, "cmd": cmd})
             socketio.emit("chat_tool_call",
-                          {"command": cmd, "description": desc, "shell": SHELL_LABEL},
+                          {"command": cmd, "description": desc,
+                           "shell": SHELL_LABEL, "tool": "run_command"},
                           room=sid)
 
             output, rc = stream_command(cmd, sid, term_id, socketio)
             save_msg(chat_id, "tool_result", output[:10_000], {"rc": rc, "cmd": cmd})
+            # Shell output already streams live into the terminal pane; no chat
+            # result block needed (that would duplicate it).
 
             context.append(types.Content(
                 role="model",
@@ -428,6 +545,88 @@ def run_agent(
                 ))],
             ))
             # Continue loop → Gemini will now summarise the output
+
+        # ── Handle local file / utility tools (read, write, list, grep, todo…) ─
+        elif func_call and func_call.name in _LOCAL_TOOLS:
+            if stop.is_set():
+                socketio.emit("chat_response",
+                              {"text": "_Stopped by user._", "done": True, "tokens": total_tokens},
+                              room=sid)
+                clear_stop(sid)
+                return
+
+            tname = func_call.name
+            targs = dict(func_call.args)
+            desc  = _tool_label(tname, targs)
+
+            save_msg(chat_id, "tool_call", desc, {"args": targs, "local": tname})
+            socketio.emit("chat_tool_call",
+                          {"command": f"{tname}(…)", "description": desc,
+                           "shell": "tool", "tool": tname},
+                          room=sid)
+
+            result = dispatch_tool(tname, targs)
+            summary = _tool_result_summary(tname, result)
+            save_msg(chat_id, "tool_result", summary[:10_000],
+                     {"ok": "error" not in result, "local": tname})
+            socketio.emit("chat_tool_result",
+                          {"tool": tname, "summary": summary[:2000],
+                           "ok": "error" not in result}, room=sid)
+
+            context.append(types.Content(
+                role="model",
+                parts=[types.Part(function_call=types.FunctionCall(name=tname, args=targs))],
+            ))
+            context.append(types.Content(
+                role="user",
+                parts=[types.Part(function_response=types.FunctionResponse(
+                    name=tname,
+                    response={k: (str(v)[:MAX_TOOL_OUTPUT] if isinstance(v, str) else v)
+                              for k, v in result.items()},
+                ))],
+            ))
+            # Continue loop → model uses the tool result
+
+        # ── Handle Burp Suite MCP tool call ───────────────────────────────────
+        elif func_call and burp.is_burp_tool(func_call.name):
+            if stop.is_set():
+                socketio.emit("chat_response",
+                              {"text": "_Stopped by user._", "done": True, "tokens": total_tokens},
+                              room=sid)
+                clear_stop(sid)
+                return
+
+            bname = func_call.name
+            bargs = dict(func_call.args)
+            desc  = f"Burp: {bname}"
+
+            save_msg(chat_id, "tool_call", desc, {"args": bargs, "burp": bname})
+            socketio.emit("chat_tool_call",
+                          {"command": f"{bname}({', '.join(f'{k}={v}' for k, v in bargs.items())[:200]})",
+                           "description": desc, "shell": "Burp MCP", "tool": bname},
+                          room=sid)
+
+            b_result = burp.call_tool(bname, bargs)
+            b_out    = b_result.get("output") or b_result.get("error") or "(no output)"
+            save_msg(chat_id, "tool_result", str(b_out)[:10_000],
+                     {"rc": 0 if b_result.get("success") else 1, "burp": bname})
+            socketio.emit("chat_tool_result",
+                          {"tool": bname, "summary": str(b_out)[:2000],
+                           "ok": bool(b_result.get("success"))}, room=sid)
+
+            context.append(types.Content(
+                role="model",
+                parts=[types.Part(function_call=types.FunctionCall(name=bname, args=bargs))],
+            ))
+            context.append(types.Content(
+                role="user",
+                parts=[types.Part(function_response=types.FunctionResponse(
+                    name=bname,
+                    response={k: str(v)[:MAX_TOOL_OUTPUT] if isinstance(v, str) else v
+                              for k, v in b_result.items()},
+                ))],
+            ))
+            # Continue loop → Gemini will now use the Burp result
 
         # ── Final text response ───────────────────────────────────────────────
         else:

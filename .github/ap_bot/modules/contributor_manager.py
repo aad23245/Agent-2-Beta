@@ -53,17 +53,16 @@ def run(github_api: GitHubAPI, gemini_client: Optional[GeminiClient] = None) -> 
         gemini_client: Unused (kept for interface consistency).
     """
     author: Optional[str] = config.PR_AUTHOR
-    pr_number_str: Optional[str] = config.PR_NUMBER
-    
+    pr_number: Optional[int] = config.PR_NUMBER
+
     if not author:
         logger.error("No PR_AUTHOR found in config. Aborting contributor manager.")
         return
-    if not pr_number_str:
+    if not pr_number:
         logger.error("No PR_NUMBER found in config. Aborting contributor manager.")
         return
 
     try:
-        pr_number = int(pr_number_str)
         # Fetch PR counts for the user
         logger.info(f"Checking contributor milestones for @{author}...")
         merged_prs = github_api.get_user_pull_requests(author)

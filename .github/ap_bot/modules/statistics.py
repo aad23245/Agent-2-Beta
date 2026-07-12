@@ -40,29 +40,28 @@ def run(github_api: GitHubAPI, gemini_client: Optional[GeminiClient] = None) -> 
 
         forks = repo_data.get("forks_count", 0)
         stars = repo_data.get("stargazers_count", 0)
-        open_issues_count = repo_data.get("open_issues_count", 0)
 
         # 2. Fetch Open Issues & PRs
         issues_list = github_api.list_issues(state="all", per_page=100)
-        
+
         open_issues = 0
         closed_issues = 0
         open_prs = 0
-        merged_prs = 0
-        
+        closed_prs = 0
+
         label_counter: Counter = Counter()
 
         for iss in issues_list:
             is_pr = "pull_request" in iss
             state = iss.get("state")
-            
+
             if is_pr:
                 if state == "open":
                     open_prs += 1
                 elif state == "closed":
-                    # Check if merged
-                    # (Usually github API doesn't show merged details in issue lists, but we can assume closed = merged for simplified stats if no other indicator)
-                    merged_prs += 1
+                    # The issues list endpoint does not expose merge status,
+                    # so closed PRs are counted together (merged + declined).
+                    closed_prs += 1
             else:
                 if state == "open":
                     open_issues += 1
@@ -87,7 +86,7 @@ def run(github_api: GitHubAPI, gemini_client: Optional[GeminiClient] = None) -> 
             open_issues=open_issues,
             closed_issues=closed_issues,
             open_prs=open_prs,
-            merged_prs=merged_prs,
+            closed_prs=closed_prs,
             labels=label_counter,
             contributors=top_contributors,
         )
@@ -105,7 +104,7 @@ def _generate_report_markdown(
     open_issues: int,
     closed_issues: int,
     open_prs: int,
-    merged_prs: int,
+    closed_prs: int,
     labels: Counter,
     contributors: List[dict],
 ) -> str:
@@ -117,7 +116,7 @@ def _generate_report_markdown(
         open_issues: Count of open issues.
         closed_issues: Count of closed issues.
         open_prs: Count of open pull requests.
-        merged_prs: Count of merged pull requests.
+        closed_prs: Count of closed pull requests (merged or declined).
         labels: Label distribution counter.
         contributors: List of top contributor dicts.
 
@@ -125,8 +124,8 @@ def _generate_report_markdown(
         Formatted markdown report.
     """
     total_issues = open_issues + closed_issues
-    total_prs = open_prs + merged_prs
-    
+    total_prs = open_prs + closed_prs
+
     lines = [
         "## 📊 Repository Statistics Report",
         "",
@@ -141,8 +140,8 @@ def _generate_report_markdown(
         "",
         "### 🔀 Pull Request Summary",
         f"- 🟢 **Open Pull Requests:** {open_prs}",
-        f"- 💜 **Merged Pull Requests:** {merged_prs}",
-        f"- 📊 **Merge Rate:** {merged_prs / max(1, total_prs):.1%}",
+        f"- 🟣 **Closed Pull Requests:** {closed_prs}",
+        f"- 📊 **Close Rate:** {closed_prs / max(1, total_prs):.1%}",
         "",
         "### 🏷️ Label Distribution (Open Issues)",
     ]

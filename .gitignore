@@ -1,11 +1,6 @@
-# Author: Aarav Shah
+﻿# Author: Aarav Shah
 # Portfolio: aaravshah1311.is-great.net
 # github: github.com/aaravshah1311
-
-# Local secrets
-.env
-.env.*
-!.env.example
 
 # Python
 __pycache__/
@@ -36,7 +31,5 @@ Thumbs.db
 .vscode/
 .idea/
 
-# html files
-index.html
-wdocs.html
-website.html
+# Note: the marketing/docs site under website/ and static assets under public/
+# ARE tracked on purpose — do not ignore them.

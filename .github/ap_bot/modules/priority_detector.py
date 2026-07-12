@@ -72,6 +72,12 @@ def run(github_api: GitHubAPI, gemini_client: GeminiClient) -> Optional[str]:
 
     try:
         issue = github_api.get_issue(issue_number)
+        if not issue:
+            logger.error(
+                f"Could not fetch issue #{issue_number}. "
+                f"Aborting priority detection."
+            )
+            return None
         title: str = issue.get("title", "")
         body: str = issue.get("body", "") or ""
 

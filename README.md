@@ -48,7 +48,7 @@ github: github.com/aaravshah1311
 | 🌐 **Web UI** | `agent2web.py` | Browser interface — workspaces, multi-tab terminals, Three.js 3D welcome, real-time streaming |
 | ⚡ **CLI** | `agent2cli.py` | Terminal-native agent — same brain, tools, and memory as the web UI |
 
-Both modes share the same **8 agentic tools**, persistent memory engine, and `.env`-based API key rotation.
+Both modes share the same **12 agentic tools**, persistent memory engine, Burp Suite MCP bridge, custom-provider support, and an `agent2.db` SQLite store for keys/memories/rules.
 
 ---
 
@@ -57,18 +57,20 @@ Both modes share the same **8 agentic tools**, persistent memory engine, and `.e
 | | Feature | Description |
 |-|---------|-------------|
 | 🗂️ | **Workspaces** | Claude Projects-style context — path browser, per-workspace memory, framework detection |
-| 🤖 | **8 Agent Tools** | Shell, read_file, write_file, scan_project, multi_edit_files, web_search, save_memory, emit_plan |
+| 🤖 | **12 Agent Tools** | run_command, read_file, write_file, multi_edit_files, list_dir, grep_search, delete_file, scan_project, web_search, update_todo, save_memory, emit_plan |
 | 📝 | **Multi-File Editing** | Precise find-and-replace patching across multiple files autonomously |
 | 🧠 | **Persistent Memory** | Global, workspace-scoped, and auto-extracted memories across sessions |
 | 💻 | **Multi-tab Terminals** | Live streaming, stdin injection, ↑↓ command history, 2-stage kill |
-| 🔑 | **API Key Rotation** | Multiple keys, auto-rotate on quota, pin a key, per-key usage stats |
+| 🔑 | **API Key Rotation** | Up to 9 keys, auto-rotate on quota, pin a key, per-key usage stats |
+| 🔌 | **Custom Providers** | Bring your own API — any OpenAI- or Anthropic-compatible endpoint (base URL + key + model id) |
+| 🕷️ | **Burp Suite MCP** | Connect to Burp's MCP server and expose every Burp tool (Proxy, Repeater, Intruder, Scanner…) to the agent |
 | 🔒 | **Security Testing** | Autonomous vulnerability scanning, logic flaw detection (XSS/SQLi), nmap, metasploit built-in workflows |
 | 🌐 | **Web Search** | DuckDuckGo instant answers — no extra API key required |
 | ✏️ | **Message Editing** | Edit any past message and re-run the agent from that point |
 | ⏹️ | **Stop Generation** | Cancel agent mid-flight at any time |
 | 📎 | **File Attachments** | Attach code, images, PDFs as context |
 | ▶️ | **One-click Run** | Click ▶ on any tool block to instantly run that command in the active terminal |
-| 🎨 | **3D Welcome Screen** | Three.js — neural particles, torus knot, rotating wireframes, octahedron |
+| 🎨 | **3D Welcome Screen** | Three.js — neural particles, hexagonal node network, rotating orbits |
 | 📦 | **Project Auto-Setup** | Detect framework → install deps → run project automatically |
 
 ---
@@ -86,57 +88,96 @@ Both modes share the same **8 agentic tools**, persistent memory engine, and `.e
 <div align="center">
   <img src="pic/img3.png" alt="Agent2 CLI" width="80%" />
 </div>
-<p align="center"><sub><strong>Agent2 CLI</strong> — Rich UI, key rotation, ↑↓ history, and all 8 tools in the terminal</sub></p>
+<p align="center"><sub><strong>Agent2 CLI</strong> — Rich UI, key rotation, ↑↓ history, and all 12 tools in the terminal</sub></p>
 
 ---
 
 ## 🧱 Project Structure
 
 ```text
-agent2/
-├── run.py                  ← Universal launcher — setup, run, manage keys
+Agent-2-Beta/
+├── run.py                  ← Universal launcher — setup, run, update, manage keys
+├── install.py              ← One-line network installer (curl | python)
 ├── agent2web.py            ← Web UI entry point
 ├── agent2cli.py            ← CLI agent entry point
-├── .env                    ← API keys  (auto-created on first run)
-├── agent2.db               ← SQLite database  (auto-created)
+├── agent2.db               ← SQLite DB — keys, memories, rules, providers (auto-created)
+├── public/                 ← Static web assets (style.css, script.js, favicon.ico)
+├── website/                ← Marketing / docs landing page
 └── agent2/
-    ├── __init__.py
     ├── config.py           ← Platform detection, models, modes, constants
     ├── database.py         ← SQLite helpers + schema + migrations
-    ├── memory.py           ← Memory engine (auto-extract, workspace-scoped)
-    ├── tools.py            ← 8 tool implementations
     ├── keys.py             ← KeyRotator: rotation, pinning, usage tracking
+    ├── tools.py            ← 12 tool implementations + Gemini schema
     ├── terminal.py         ← stream_command, stdin, kill, stop events
-    ├── agent.py            ← system_prompt, context builder, run_agent loop
+    ├── agent.py            ← system_prompt, context builder, Gemini agent loop
+    ├── provider_agent.py   ← Agent loop for custom OpenAI/Anthropic providers
+    ├── providers.py        ← Custom provider store + wire-format translation
+    ├── burp_mcp.py         ← Burp Suite MCP bridge (exposes Burp tools to the agent)
     ├── routes.py           ← All /api/* REST endpoints
     ├── sockets.py          ← All Socket.IO event handlers
-    └── ui.py               ← HTML/CSS/JS single-page frontend  (89 KB)
+    └── ui.py               ← HTML shell for the single-page frontend
 ```
+
+> **Note:** Agent2 no longer uses `.env`. All keys and settings live in `agent2.db`.
+> Any legacy `.env` is imported once on first run, then renamed to `.env.migrated`.
 
 ---
 
 ## ⚙️ Installation
 
-### 1 — Clone
+### Option A — One-line install *(recommended)*
+
+Run this in any terminal. It downloads Agent2, builds an isolated `.venv`, installs
+every dependency, and starts the app — no manual clone required:
+
+```bash
+# macOS / Linux
+curl -fsSL https://raw.githubusercontent.com/aaravshah1311/Agent-2-Beta/main/install.py | python3 -
+```
+
+```powershell
+# Windows (PowerShell)
+irm https://raw.githubusercontent.com/aaravshah1311/Agent-2-Beta/main/install.py | python -
+```
+
+The installer clones into `./Agent-2-Beta`. Override anything with env vars:
+
+```bash
+AGENT2_DIR=~/tools/agent2   \   # where to install   (default: ./Agent-2-Beta)
+AGENT2_MODE=cli             \   # web | cli | none    (default: web)
+curl -fsSL https://raw.githubusercontent.com/aaravshah1311/Agent-2-Beta/main/install.py | python3 -
+```
+
+> ℹ️ **Why a dedicated `install.py`?** Piping `run.py` straight into Python does **not**
+> work — the launcher is interactive (it prompts for keys) and a piped script has no
+> keyboard on stdin. `install.py` is built for the pipe: it never prompts, clones the
+> repo, then hands off to `run.py` for setup. Add your Gemini key afterwards in the web
+> **Settings** panel or with `agent2 --addapi`.
+
+> 🔑 **Free Gemini API key →** https://aistudio.google.com/app/apikey
+
+---
+
+### Option B — Manual clone
+
+#### 1 — Clone
 
 ```bash
 git clone https://github.com/aaravshah1311/Agent-2-Beta.git
 cd Agent-2-Beta
 ```
 
-### 2 — Run the launcher
+#### 2 — Run the launcher
 
 ```bash
 python run.py
 ```
 
 `run.py` will automatically:
-- ✅ Create a virtual environment
-- ✅ Install all dependencies (`flask`, `flask-socketio`, `google-genai`, `rich`, …)
-- ✅ Prompt for your Gemini API key and save it to `.env`
-- ✅ Start the web server
-
-> 🔑 **Free Gemini API key →** https://aistudio.google.com/app/apikey
+- ✅ Create an isolated virtual environment (`.venv`)
+- ✅ Install all dependencies (`flask`, `flask-socketio`, `google-genai`, `rich`, `mcp`, …)
+- ✅ Prompt for your Gemini API key and save it to `agent2.db`
+- ✅ Install a global `agent2` command and start the app
 
 ---
 
@@ -151,8 +192,9 @@ agent2                 setup + start Web UI  (default)
 agent2 --web           setup + start Web UI
 agent2 --cli           setup + start CLI agent
 agent2 --addapi        add / manage API keys
+agent2 --update        update to the latest code  (keeps agent2.db)  (-up also works)
 agent2 --reset         wipe venv and reinstall everything
-agent2 --uninstall     completely remove Agent2 and its venv
+agent2 --uninstall     completely remove Agent2 (venv, keys, DB, global command)
 agent2 -h              show this help menu
 ```
 
@@ -180,10 +222,10 @@ Or call directly after first setup:
 
 ```bash
 # macOS / Linux
-venv/bin/python agent2cli.py
+.venv/bin/python agent2cli.py
 
 # Windows
-venv\Scripts\python agent2cli.py
+.venv\Scripts\python agent2cli.py
 ```
 
 ---
@@ -196,8 +238,8 @@ venv\Scripts\python agent2cli.py
 agent2 --addapi
 ```
 
-Walks you through adding keys interactively and saves them to `.env`.  
-Keys are stored as `GEMINI_API_KEY`, `GEMINI_API_KEY_2`, `GEMINI_API_KEY_3` … and **auto-rotated** when one exhausts its quota. No downtime — the next key is picked up on the very next request.
+Walks you through adding keys interactively and saves them to `agent2.db`.
+Keys are stored in the `api_keys` table and **auto-rotated** when one exhausts its quota. No downtime — the next key is picked up on the very next request.
 
 ### Inside a CLI session
 
@@ -205,7 +247,7 @@ Keys are stored as `GEMINI_API_KEY`, `GEMINI_API_KEY_2`, `GEMINI_API_KEY_3` … 
 /addapi
 ```
 
-Paste a new key without leaving the session — saved to `.env` immediately and active on the next call.
+Paste a new key without leaving the session — saved to `agent2.db` immediately and active on the next call.
 
 ### Reset everything
 
@@ -213,7 +255,7 @@ Paste a new key without leaving the session — saved to `.env` immediately and 
 agent2 --reset
 ```
 
-Wipes `venv/` and reinstalls all dependencies. Use when packages break or Python is upgraded.
+Wipes `.venv/` and reinstalls all dependencies. Use when packages break or Python is upgraded.
 
 ### Full uninstall
 
@@ -241,13 +283,17 @@ Every chat belongs to a workspace. The agent always knows your project path, det
 | Command | Description |
 |---------|-------------|
 | `/help` | Show all commands |
-| `/addapi` | Add a Gemini API key to `.env` |
+| `/addapi` | Add a Gemini API key to `agent2.db` |
 | `/keys` | Show current API key status and usage |
-| `/model [name]` | Switch model (`2.5-flash` · `2.5-flash` · `2.5-pro` · `3.1-*`) |
+| `/burp [connect\|disconnect\|list\|status]` | Manage the Burp Suite MCP bridge — connect to a running Burp and expose all its tools to the agent |
+| `/provider [add\|list\|use\|del\|test]` | Add your own model API (base URL + API key + model ID; OpenAI- or Anthropic-compatible) and switch to it |
+| `/model [name]` | Switch model (`2.5-flash` · `2.5-pro` · `3.1-flash` · `3.1-pro`) |
 | `/mode [name]` | Switch mode (`fast ⚡` · `pro ★` · `thinking 🧠`) |
-| `/clear` | Clear current conversation and start fresh |
+| `/theme [name]` | Switch the CLI colour theme (arrow-key picker) |
+| `/color [name]` | Set the accent colour |
+| `/clear` | Clear the screen (keeps conversation history) |
 | `/shrink` | Summarize and shrink history manually |
-| `/clearhistory` | Clear message history |
+| `/clearhistory` | Clear the conversation history |
 | `/history` | Show last 10 messages |
 | `/memory` | List all saved memories with importance scores |
 | `/addmem <text>` | Save a memory manually |
@@ -263,7 +309,7 @@ Every chat belongs to a workspace. The agent always knows your project path, det
 
 - [ ] Python 3.10+ installed
 - [ ] `python run.py` completed without errors
-- [ ] Gemini API key saved to `.env`
+- [ ] Gemini API key saved to `agent2.db`
 - [ ] Web UI → server starts at **http://localhost:1311**, first workspace created
 - [ ] CLI → prompt `you [no-ws|2.5-flash|★]>` appears
 
@@ -273,11 +319,14 @@ Every chat belongs to a workspace. The agent always knows your project path, det
 
 | Key | Model | Group |
 |-----|-------|-------|
-| `2.5-flash` | Gemini 2.5 Flash | 2.5 |
+| `2.5-flash` | Gemini 2.5 Flash *(default)* | 2.5 |
 | `2.5-pro` | Gemini 2.5 Pro | 2.5 |
 | `3.1-flash` | Gemini 3.1 Flash | 3.1 |
-| `3.1-flash` | Gemini 3.1 Flash | 3.1 |
 | `3.1-pro` | Gemini 3.1 Pro | 3.1 |
+
+> Need a different model or provider? Add any OpenAI-/Anthropic-compatible endpoint
+> with `/provider add` (CLI) or the **Providers** tab in web Settings — it then appears
+> in the model dropdown alongside the built-in Gemini models.
 
 ## ⚡ Reasoning Modes
 
@@ -298,7 +347,7 @@ Every chat belongs to a workspace. The agent always knows your project path, det
 | Database | SQLite (stdlib `sqlite3`) |
 | Terminal | `subprocess.Popen` — live stdout streaming |
 | Web frontend | Vanilla JS, xterm.js, marked.js, highlight.js, Three.js |
-| 3D scene | Three.js r128 — particles, torus knot, icosahedra, octahedron |
+| 3D scene | Three.js r128 — particles, hexagonal node network, orbit rings |
 | CLI UI | Rich — panels, markdown, syntax highlight, spinner |
 | Memory | Auto-extraction via background Gemini call after each reply |
 | Web search | DuckDuckGo Instant Answer API — no key required |
@@ -351,7 +400,7 @@ Supports: `nmap`, `nikto`, `gobuster`, `ffuf`, `sqlmap`, `hydra`, `metasploit`,
 | | Agent-2-Beta | Agent-2-Pro |
 |-|:---:|:---:|
 | Workspaces | ✅ | ✅ |
-| 8 Agent Tools | ✅ | ✅ Extended |
+| 12 Agent Tools | ✅ | ✅ Extended |
 | Memory Engine | ✅ | ✅ Advanced |
 | Multi-tab Terminals | ✅ | ✅ |
 | **Full-project generation from one prompt** | ❌ | ✅ |

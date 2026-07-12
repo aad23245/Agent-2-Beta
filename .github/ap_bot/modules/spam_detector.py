@@ -80,6 +80,13 @@ def run(github_api: GitHubAPI, gemini_client: GeminiClient) -> bool:
         else:
             item = github_api.get_issue(issue_number)  # type: ignore[arg-type]
 
+        if not item:
+            logger.error(
+                f"Could not fetch {target_type} #{target_number}. "
+                f"Aborting spam detection."
+            )
+            return False
+
         title: str = item.get("title", "")
         body: str = item.get("body", "") or ""
 

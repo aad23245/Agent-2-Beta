@@ -90,6 +90,11 @@ def _welcome_issue(github_api: GitHubAPI, issue_number: int) -> None:
     """
     try:
         issue = github_api.get_issue(issue_number)
+        if not issue:
+            logger.error(
+                f"Could not fetch issue #{issue_number}. Skipping welcome comment."
+            )
+            return
         author: str = issue.get("user", {}).get("login", "contributor")
 
         body = _ISSUE_WELCOME.format(author=author)
@@ -111,6 +116,11 @@ def _welcome_pr(github_api: GitHubAPI, pr_number: int) -> None:
     """
     try:
         pr = github_api.get_pr(pr_number)
+        if not pr:
+            logger.error(
+                f"Could not fetch PR #{pr_number}. Skipping welcome comment."
+            )
+            return
         author: str = pr.get("user", {}).get("login", "contributor")
 
         body = _PR_WELCOME.format(author=author)

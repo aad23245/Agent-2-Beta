@@ -13,8 +13,7 @@ Project layout
   agent2web.py         ← you are here  (python run.py  or  python agent2web.py)
   agent2cli.py         ← agent2 CLI entry point (python agent2cli.py)
   run.py               ← cross-platform setup launcher (creates venv, installs deps)
-  .env                 ← API keys  (auto-created by run.py or Settings UI)
-  agent2.db            ← SQLite database (auto-created on first run)
+  agent2.db            ← SQLite database — API keys, memories, rules, providers
   agent2/
     __init__.py
     config.py          ← platform detection, models, modes, constants, root paths
@@ -101,10 +100,12 @@ from flask import Flask, Response
 from flask_socketio import SocketIO
 from flask import send_from_directory
 
-# config.py auto-loads .env
+# All API keys (Gemini + custom providers) live in agent2.db — no .env.
 from agent2.config   import OS_NAME, SHELL_LABEL
 from agent2.database import init_db
 init_db()
+from agent2.providers import init_providers_table
+init_providers_table()
 from agent2.keys     import rotator
 from agent2.routes   import register_routes
 from agent2.sockets  import register_sockets
@@ -180,7 +181,7 @@ if __name__ == "__main__":
 
         if not keys:
             print("  [!]  No API keys configured")
-            print("       Add one via:  python run.py --addkey")
+            print("       Add one via:  python run.py --addapi")
             print("       Or open Settings in the web UI after starting.")
         else:
             for k in keys:

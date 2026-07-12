@@ -1,0 +1,1146 @@
+<!--
+Author: Aarav Shah
+Portfolio: aaravshah1311.is-great.net
+github: github.com/aaravshah1311
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Agent-2 Docs — Documentation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0a0a;--bg1:#0f0f0f;--bg2:#141414;--bg3:#1a1a1a;
+  --bd:#252525;--bd2:#303030;
+  --tx:#e2e2e2;--tx2:#888;--tx3:#444;--wh:#fff;
+  --ac:#d4a853;--pu:#7c6af7;--gr:#3ddc84;--cy:#60b8ff;--rd:#ff5555;--or:#f97316;--yw:#f0c060;
+  --mn:'IBM Plex Mono',monospace;--sn:'Inter',sans-serif;
+  --sidebar:260px;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--tx);font-family:var(--sn);overflow-x:hidden}
+a{text-decoration:none;color:inherit}
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-thumb{background:var(--bd2);border-radius:2px}
+
+/* ── Layout ──────────────────────────────────────────────── */
+#app{display:flex;min-height:100vh}
+
+/* ── Sidebar ──────────────────────────────────────────────── */
+#sidebar{
+  width:var(--sidebar);flex-shrink:0;
+  background:var(--bg1);border-right:1px solid var(--bd);
+  position:fixed;top:0;left:0;bottom:0;overflow-y:auto;
+  display:flex;flex-direction:column;z-index:100;
+  transition:transform .3s ease;
+}
+.sb-header{
+  padding:20px 20px 16px;border-bottom:1px solid var(--bd);
+  display:flex;align-items:center;gap:10px;flex-shrink:0;
+}
+.sb-logo-icon{
+  width:28px;height:28px;border-radius:7px;
+  background:linear-gradient(135deg,var(--pu),#4060e8);
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;flex-shrink:0;
+}
+.sb-logo-text{font-size:15px;font-weight:600;color:var(--wh)}
+.sb-logo-text span{color:var(--ac)}
+.sb-version{font-family:var(--mn);font-size:9px;color:var(--tx3);margin-left:auto;
+  border:1px solid var(--bd2);padding:2px 7px;border-radius:4px}
+
+.sb-search{padding:12px 16px;border-bottom:1px solid var(--bd);flex-shrink:0}
+.sb-search input{
+  width:100%;background:var(--bg2);border:1px solid var(--bd);border-radius:6px;
+  padding:7px 10px;font-size:12px;color:var(--tx);outline:none;font-family:var(--mn);
+  transition:border-color .15s;
+}
+.sb-search input:focus{border-color:var(--pu)}
+.sb-search input::placeholder{color:var(--tx3)}
+
+.sb-nav{padding:12px 0;flex:1}
+.sb-section{margin-bottom:20px;padding:0 14px}
+.sb-section-title{
+  font-family:var(--mn);font-size:9.5px;color:var(--tx3);
+  letter-spacing:.12em;text-transform:uppercase;padding:0 6px;
+  margin-bottom:6px;
+}
+.sb-link{
+  display:flex;align-items:center;gap:8px;
+  padding:6px 8px;border-radius:6px;font-size:13px;color:var(--tx2);
+  transition:all .15s;cursor:pointer;border:none;background:none;
+  width:100%;text-align:left;
+}
+.sb-link:hover{background:var(--bg3);color:var(--tx)}
+.sb-link.active{background:rgba(124,106,247,.1);color:var(--pu);border:1px solid rgba(124,106,247,.2)}
+.sb-link svg{width:13px;height:13px;flex-shrink:0;opacity:.6}
+.sb-link.active svg{opacity:1}
+.sb-badge{
+  margin-left:auto;font-family:var(--mn);font-size:9px;
+  padding:1px 6px;border-radius:3px;
+}
+.badge-new{background:rgba(61,220,132,.12);color:var(--gr);border:1px solid rgba(61,220,132,.25)}
+.badge-pro{background:rgba(249,115,22,.1);color:var(--or);border:1px solid rgba(249,115,22,.25)}
+
+.sb-footer{
+  padding:14px 16px;border-top:1px solid var(--bd);flex-shrink:0;
+  display:flex;gap:10px;flex-wrap:wrap;
+}
+.sb-footer a{font-family:var(--mn);font-size:10.5px;color:var(--tx3);transition:color .15s}
+.sb-footer a:hover{color:var(--wh)}
+
+/* ── Main content ─────────────────────────────────────────── */
+#content{
+  margin-left:var(--sidebar);flex:1;min-width:0;
+}
+
+/* ── Top bar ──────────────────────────────────────────────── */
+#topbar{
+  position:sticky;top:0;z-index:50;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 48px;height:52px;
+  background:rgba(10,10,10,.9);backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--bd);
+}
+.tb-breadcrumb{
+  font-family:var(--mn);font-size:11.5px;color:var(--tx3);
+  display:flex;align-items:center;gap:8px;
+}
+.tb-breadcrumb .sep{color:var(--tx3);opacity:.4}
+.tb-breadcrumb .current{color:var(--tx)}
+.tb-actions{display:flex;gap:10px;align-items:center}
+.tb-btn{
+  font-family:var(--mn);font-size:11px;color:var(--tx3);
+  border:1px solid var(--bd2);padding:5px 12px;border-radius:5px;transition:all .15s;
+}
+.tb-btn:hover{color:var(--wh);border-color:var(--tx3)}
+.mob-menu-btn{
+  display:none;flex-direction:column;gap:4px;
+  background:none;border:none;padding:6px;cursor:pointer;
+}
+.mob-menu-btn span{display:block;width:18px;height:1.5px;background:var(--tx2)}
+
+/* ── Doc page ─────────────────────────────────────────────── */
+.doc-page{
+  max-width:760px;padding:48px 48px 80px;
+  display:none;
+}
+.doc-page.active{display:block}
+
+/* ── Typography ───────────────────────────────────────────── */
+h1.doc-title{
+  font-size:34px;font-weight:600;color:var(--wh);
+  letter-spacing:-.02em;line-height:1.2;margin-bottom:12px;
+}
+.doc-meta{
+  display:flex;gap:16px;margin-bottom:32px;flex-wrap:wrap;
+}
+.doc-meta span{font-family:var(--mn);font-size:10.5px;color:var(--tx3)}
+.doc-meta .tag{
+  padding:2px 8px;border-radius:4px;border:1px solid var(--bd2);
+}
+.doc-intro{
+  font-size:16px;color:var(--tx2);line-height:1.75;
+  border-left:3px solid var(--ac);padding-left:16px;margin-bottom:40px;
+}
+
+h2.doc-h2{
+  font-size:22px;font-weight:600;color:var(--wh);
+  margin:40px 0 14px;padding-top:40px;border-top:1px solid var(--bd);
+  letter-spacing:-.01em;
+}
+h2.doc-h2:first-of-type{border-top:none;padding-top:0}
+h3.doc-h3{font-size:16px;font-weight:500;color:var(--wh);margin:28px 0 10px}
+p.doc-p{font-size:14.5px;color:var(--tx2);line-height:1.75;margin-bottom:16px}
+ul.doc-ul,ol.doc-ol{padding-left:22px;margin-bottom:16px}
+ul.doc-ul li,ol.doc-ol li{font-size:14.5px;color:var(--tx2);line-height:1.75;margin-bottom:6px}
+ul.doc-ul li strong,ol.doc-ol li strong{color:var(--wh)}
+
+/* Code blocks */
+.code-block{
+  background:var(--bg1);border:1px solid var(--bd);border-radius:8px;
+  overflow:hidden;margin:16px 0;
+}
+.code-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:8px 14px;border-bottom:1px solid var(--bd);
+  background:rgba(20,20,20,.5);
+}
+.code-lang{font-family:var(--mn);font-size:10px;color:var(--tx3);letter-spacing:.08em}
+.code-copy{
+  font-family:var(--mn);font-size:10px;color:var(--tx3);
+  background:none;border:none;cursor:pointer;transition:color .15s;padding:2px 6px;
+}
+.code-copy:hover{color:var(--wh)}
+pre.code-body{
+  padding:16px 18px;font-family:var(--mn);font-size:12.5px;
+  line-height:1.7;color:var(--tx);overflow-x:auto;
+}
+pre.code-body .kw{color:var(--pu)}
+pre.code-body .st{color:var(--gr)}
+pre.code-body .cm{color:var(--tx3)}
+pre.code-body .nu{color:var(--cy)}
+pre.code-body .op{color:var(--or)}
+
+code.inline{
+  font-family:var(--mn);font-size:12.5px;
+  background:var(--bg3);border:1px solid var(--bd);
+  padding:2px 6px;border-radius:4px;color:var(--cy);
+}
+
+/* Alert boxes */
+.alert{
+  border-radius:8px;padding:14px 16px;margin:20px 0;
+  display:flex;gap:12px;align-items:flex-start;
+}
+.alert-icon{font-size:16px;flex-shrink:0;margin-top:1px}
+.alert-body{font-size:13.5px;color:var(--tx2);line-height:1.65}
+.alert-body strong{display:block;margin-bottom:4px;font-size:13px}
+.alert.tip{background:rgba(61,220,132,.06);border:1px solid rgba(61,220,132,.2)}
+.alert.tip .alert-body strong{color:var(--gr)}
+.alert.warn{background:rgba(240,192,96,.06);border:1px solid rgba(240,192,96,.2)}
+.alert.warn .alert-body strong{color:var(--yw)}
+.alert.info{background:rgba(96,184,255,.06);border:1px solid rgba(96,184,255,.2)}
+.alert.info .alert-body strong{color:var(--cy)}
+.alert.err{background:rgba(255,85,85,.06);border:1px solid rgba(255,85,85,.2)}
+.alert.err .alert-body strong{color:var(--rd)}
+
+/* Flag table */
+.flag-table{width:100%;border-collapse:collapse;margin:16px 0;font-size:13.5px}
+.flag-table th{
+  padding:10px 14px;text-align:left;font-family:var(--mn);font-size:10px;
+  letter-spacing:.08em;text-transform:uppercase;color:var(--tx3);
+  border-bottom:1px solid var(--bd);font-weight:400;
+}
+.flag-table td{padding:11px 14px;border-bottom:1px solid rgba(37,37,37,.6);color:var(--tx2)}
+.flag-table td:first-child{font-family:var(--mn);font-size:12px;color:var(--cy)}
+.flag-table tr:hover td{background:rgba(255,255,255,.02)}
+
+/* Step list */
+.step-list{list-style:none;padding:0;margin:16px 0}
+.step-list li{
+  display:flex;gap:14px;margin-bottom:16px;
+  padding:14px;border:1px solid var(--bd);border-radius:8px;
+  transition:border-color .15s;
+}
+.step-list li:hover{border-color:var(--bd2)}
+.step-n{
+  width:28px;height:28px;border-radius:6px;background:var(--bg3);border:1px solid var(--bd2);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--mn);font-size:12px;color:var(--ac);flex-shrink:0;
+}
+.step-body{}
+.step-title{font-size:14px;font-weight:500;color:var(--wh);margin-bottom:4px}
+.step-desc{font-size:13px;color:var(--tx2);line-height:1.65}
+
+/* Trouble table */
+.trouble-table{width:100%;border-collapse:collapse;font-size:13px}
+.trouble-table th{
+  padding:10px 14px;text-align:left;
+  font-family:var(--mn);font-size:9.5px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--tx3);border-bottom:1px solid var(--bd);font-weight:400;
+}
+.trouble-table td{padding:12px 14px;border-bottom:1px solid rgba(37,37,37,.5);color:var(--tx2);vertical-align:top}
+.trouble-table td:first-child{font-family:var(--mn);font-size:12px;color:var(--rd);max-width:260px}
+.trouble-table tr:hover td{background:rgba(255,255,255,.015)}
+
+/* Page nav */
+.page-nav{
+  display:flex;justify-content:space-between;margin-top:60px;
+  border-top:1px solid var(--bd);padding-top:24px;gap:20px;
+}
+.pg-btn{
+  display:flex;flex-direction:column;gap:3px;padding:14px 18px;
+  border:1px solid var(--bd);border-radius:8px;transition:all .2s;flex:1;max-width:200px;
+}
+.pg-btn:hover{border-color:var(--bd2);background:var(--bg2)}
+.pg-dir{font-family:var(--mn);font-size:10px;color:var(--tx3);letter-spacing:.06em}
+.pg-label{font-size:13.5px;color:var(--wh);font-weight:500}
+.pg-btn.next{text-align:right;margin-left:auto}
+
+/* ── Right TOC ────────────────────────────────────────────── */
+#toc{
+  position:fixed;right:0;top:52px;bottom:0;width:220px;
+  padding:24px 20px;overflow-y:auto;border-left:1px solid var(--bd);
+  background:var(--bg1);
+}
+.toc-title{font-family:var(--mn);font-size:9.5px;color:var(--tx3);letter-spacing:.12em;
+  text-transform:uppercase;margin-bottom:12px}
+.toc-link{
+  display:block;font-size:12px;color:var(--tx3);padding:4px 0 4px 10px;
+  border-left:2px solid transparent;transition:all .15s;
+}
+.toc-link:hover{color:var(--tx);border-left-color:var(--bd2)}
+.toc-link.active{color:var(--pu);border-left-color:var(--pu)}
+
+/* ── Mobile ───────────────────────────────────────────────── */
+@media(max-width:1200px){
+  #toc{display:none}
+  .doc-page{padding:40px 40px 60px}
+}
+@media(max-width:900px){
+  #sidebar{transform:translateX(-100%)}
+  #sidebar.open{transform:translateX(0)}
+  #content{margin-left:0}
+  .doc-page{padding:28px 22px 50px;max-width:100%}
+  .mob-menu-btn{display:flex}
+  #topbar{padding:0 20px}
+  h1.doc-title{font-size:26px}
+  h2.doc-h2{font-size:19px}
+  pre.code-body{font-size:11.5px;padding:12px 14px}
+  .flag-table,.trouble-table{font-size:12px}
+  .flag-table td:first-child,.trouble-table td:first-child{font-size:11px}
+}
+@media(max-width:600px){
+  .doc-page{padding:20px 16px 40px}
+  h1.doc-title{font-size:22px}
+  .doc-intro{font-size:14px}
+  .page-nav{flex-direction:column}
+  .pg-btn{max-width:100%}
+  .code-block{border-radius:6px}
+}
+
+/* ── Overlay for mobile sidebar ──────────────────────────── */
+#sb-overlay{
+  display:none;position:fixed;inset:0;z-index:99;
+  background:rgba(0,0,0,.6);backdrop-filter:blur(2px);
+}
+#sb-overlay.show{display:block}
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- SIDEBAR -->
+<aside id="sidebar">
+  <div class="sb-header">
+    <div class="sb-logo-icon">⚡</div>
+    <div class="sb-logo-text">Agent<span>-2</span></div>
+    <div class="sb-version">Beta</div>
+  </div>
+
+  <div class="sb-search">
+    <input type="text" placeholder="Search docs…" id="search-input" oninput="searchDocs(this.value)">
+  </div>
+
+  <nav class="sb-nav">
+    <div class="sb-section">
+      <div class="sb-section-title">Getting Started</div>
+      <a class="sb-link active" onclick="showPage('overview')">
+        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zM0 8a8 8 0 1116 0A8 8 0 010 8z"/></svg>
+        Overview
+      </a>
+      <a class="sb-link" onclick="showPage('install')">
+        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1v9.293l3.146-3.147.708.708-4 4-4-4 .708-.708L7 10.293V1h1zm-5 13h10v1H3v-1z"/></svg>
+        Installation
+      </a>
+      <a class="sb-link" onclick="showPage('quickstart')">
+        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M3.5 1.5A.5.5 0 014 1h8a.5.5 0 01.5.5v13a.5.5 0 01-.5.5H4a.5.5 0 01-.5-.5v-13zM4 0a1 1 0 00-1 1v13a1 1 0 001 1h8a1 1 0 001-1V1a1 1 0 00-1-1H4z"/></svg>
+        Quick Start
+      </a>
+    </div>
+
+    <div class="sb-section">
+      <div class="sb-section-title">Configuration</div>
+      <a class="sb-link" onclick="showPage('api-keys')">
+        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M0 8a4 4 0 017.465 2H14v2h2v-2h1v-2h-1V6h-2V4h-2v2H7.465A4 4 0 010 8zm4 0a2 2 0 100-4 2 2 0 000 4z"/></svg>
+        API Keys
+        <span class="sb-badge badge-new">Important</span>
+      </a>
+      <a class="sb-link" onclick="showPage('models')">
+        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 0a8 8 0 100 16A8 8 0 008 0zm0 1a7 7 0 110 14A7 7 0 018 1z"/></svg>
+        Models & Modes
+      </a>
+      <a class="sb-link" onclick="showPage('workspaces')">
+        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M.54 3.87L.5 3a2 2 0 012-2h3a2 2 0 011.5.67L8 2.5h5.5A1.5 1.5 0 0115 4v8.5a1.5 1.5 0 01-1.5 1.5h-11A1.5 1.5 0 011 12.5V5a2 2 0 01-.46-1.13z"/></svg>
+        Workspaces
+      </a>
+    </div>
+
+    <div class="sb-section">
+      <div class="sb-section-title">Usage</div>
+      <a class="sb-link" onclick="showPage('web-ui')">
+        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M0 1.5A1.5 1.5 0 011.5 0h13A1.5 1.5 0 0116 1.5v13a1.5 1.5 0 01-1.5 1.5h-13A1.5 1.5 0 010 14.5v-13zM1.5 1a.5.5 0 00-.5.5V3h14V1.5a.5.5 0 00-.5-.5h-13zM15 4H1v10.5a.5.5 0 00.5.5h13a.5.5 0 00.5-.5V4z"/></svg>
+        Web UI Guide
+      </a>
+      <a class="sb-link" onclick="showPage('cli')">
+        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M6 9a.5.5 0 01.5-.5h3a.5.5 0 010 1h-3A.5.5 0 016 9zM3.854 4.146a.5.5 0 100 .708L4.793 5.5 3.854 6.292a.5.5 0 10.708.708l1.5-1.5a.5.5 0 000-.708l-1.5-1.5a.5.5 0 00-.708 0z"/></svg>
+        CLI Agent
+      </a>
+      <a class="sb-link" onclick="showPage('tools')">
+        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M1 0L0 1l2.2 3.081a1 1 0 00.815.419h.07a1 1 0 01.708.293l2.675 2.675-2.617 2.654A3.003 3.003 0 000 13a3 3 0 105.878-.851l2.654-2.617.968.968-.305.914a1 1 0 00.242 1.023l3.27 3.27a.997.997 0 001.414 0l1.586-1.586a.997.997 0 000-1.414l-3.27-3.27a1 1 0 00-1.023-.242L10.5 9.5l-.96-.96 2.68-2.643A3.005 3.005 0 0016 3c0-.269-.035-.53-.102-.777l-2.14 2.141L12 4l-.364-1.757L13.777.102a3 3 0 00-3.675 3.68L7.462 6.46 4.793 3.793a1 1 0 01-.293-.707v-.071a1 1 0 00-.419-.814L1 0z"/></svg>
+        Agent Tools
+      </a>
+      <a class="sb-link" onclick="showPage('memory')">
+        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 0a5 5 0 015 5c0 2.04-1.22 3.8-3 4.58V11h-4V9.58A5 5 0 018 0zm-2 13h4v1H6zm1 2h2v1H7z"/></svg>
+        Memory System
+      </a>
+    </div>
+
+    <div class="sb-section">
+      <div class="sb-section-title">Security</div>
+      <a class="sb-link" onclick="showPage('security')">
+        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a2 2 0 012 2v4H6V3a2 2 0 012-2zm3 6V3a3 3 0 00-6 0v4a2 2 0 00-2 2v5a2 2 0 002 2h6a2 2 0 002-2V9a2 2 0 00-2-2z"/></svg>
+        Security Testing
+      </a>
+      <a class="sb-link" onclick="showPage('burp')">
+        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 0a8 8 0 100 16A8 8 0 008 0zM4.5 7.5a3.5 3.5 0 117 0 3.5 3.5 0 01-7 0zM8 6a2 2 0 100 4 2 2 0 000-4z"/></svg>
+        Burp Suite MCP
+        <span class="sb-badge badge-pro" style="background:rgba(255,88,0,.14);color:#ff7a33;border-color:rgba(255,88,0,.3)">MCP</span>
+      </a>
+    </div>
+
+    <div class="sb-section">
+      <div class="sb-section-title">Reference</div>
+      <a class="sb-link" onclick="showPage('run-flags')">
+        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M2.5 3a.5.5 0 000 1h11a.5.5 0 000-1h-11zm0 3a.5.5 0 000 1h6a.5.5 0 000-1h-6zm0 3a.5.5 0 000 1h6a.5.5 0 000-1h-6zm8-6a.5.5 0 01.5-.5h2a.5.5 0 010 1h-2a.5.5 0 01-.5-.5zm0 3a.5.5 0 01.5-.5h2a.5.5 0 010 1h-2a.5.5 0 01-.5-.5zm0 3a.5.5 0 01.5-.5h2a.5.5 0 010 1h-2a.5.5 0 01-.5-.5z"/></svg>
+        run.py Flags
+      </a>
+      <a class="sb-link" onclick="showPage('cli-cmds')">
+        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M0 3a2 2 0 012-2h12a2 2 0 012 2v10a2 2 0 01-2 2H2a2 2 0 01-2-2V3zm9.5 5.5h-3a.5.5 0 000 1h3a.5.5 0 000-1zm-6.354-.354a.5.5 0 00.708.708l2-2a.5.5 0 000-.708l-2-2a.5.5 0 00-.708.708L4.793 6.5 3.146 8.146z"/></svg>
+        CLI Commands
+      </a>
+      <a class="sb-link" onclick="showPage('troubleshoot')">
+        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8.982 1.566a1.13 1.13 0 00-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 01-1.1 0L7.1 5.995A.905.905 0 018 5zm.002 6a1 1 0 110 2 1 1 0 010-2z"/></svg>
+        Troubleshooting
+      </a>
+      <a class="sb-link" onclick="showPage('pro')">
+        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z"/></svg>
+        Agent-2-Pro
+        <span class="sb-badge badge-pro">Pro</span>
+      </a>
+    </div>
+  </nav>
+
+  <div class="sb-footer">
+    <a href="/">← Home</a>
+    <a href="https://github.com/aaravshah1311/Agent-2-Beta" target="_blank">GitHub</a>
+    <a href="mailto:aaravprogrammers@gmail.com">Contact</a>
+  </div>
+</aside>
+
+<!-- Sidebar overlay -->
+<div id="sb-overlay" onclick="closeSidebar()"></div>
+
+<!-- MAIN -->
+<main id="content">
+  <!-- Top bar -->
+  <div id="topbar">
+    <div style="display:flex;align-items:center;gap:14px">
+      <button class="mob-menu-btn" onclick="toggleSidebar()">
+        <span></span><span></span><span></span>
+      </button>
+      <div class="tb-breadcrumb">
+        <span>Agent-2</span>
+        <span class="sep">/</span>
+        <span class="current" id="breadcrumb-current">Overview</span>
+      </div>
+    </div>
+    <div class="tb-actions">
+      <a href="https://github.com/aaravshah1311/Agent-2-Beta" target="_blank" class="tb-btn">GitHub</a>
+      <a href="/" class="tb-btn">← Website</a>
+    </div>
+  </div>
+
+  <!-- ═══════════ PAGE: OVERVIEW ═══════════ -->
+  <article class="doc-page active" id="page-overview">
+    <h1 class="doc-title">Overview</h1>
+    <div class="doc-meta">
+      <span class="tag">Agent-2-Beta</span>
+      <span class="tag">Open Source</span>
+      <span>Last updated: 2026</span>
+    </div>
+    <p class="doc-intro">Agent-2 is a self-hosted autonomous AI agent powered by Google Gemini — a coding assistant, terminal agent, security tester, and persistent memory system in one interface.</p>
+
+    <h2 class="doc-h2">What is Agent-2?</h2>
+    <p class="doc-p">Agent-2 gives you a real AI agent that runs on your own machine. It can write and run code, execute shell commands, scan networks, read and write files, search the web, and remember everything across sessions — all powered by Google Gemini with no cloud dependency beyond the API call.</p>
+    <p class="doc-p">It ships in two modes:</p>
+    <ul class="doc-ul">
+      <li><strong>Web UI</strong> — Browser interface with workspaces, multi-tab terminals, Three.js 3D welcome, and real-time streaming.</li>
+      <li><strong>CLI</strong> — Terminal-native agent (<code class="inline">agent2cli.py</code>) with the same brain, tools, and memory — works just like the Gemini CLI.</li>
+    </ul>
+
+    <h2 class="doc-h2">Key capabilities</h2>
+    <ul class="doc-ul">
+      <li><strong>12 Agentic Tools</strong> — run_command, read_file, write_file, multi_edit_files, list_dir, grep_search, delete_file, scan_project, web_search, update_todo, save_memory, emit_plan</li>
+      <li><strong>Workspaces</strong> — Claude Projects-style context management with per-workspace memory</li>
+      <li><strong>Persistent Memory</strong> — Auto-extracts facts from every conversation; survives restarts</li>
+      <li><strong>API Key Rotation</strong> — Up to 9 keys, auto-rotates on quota exhaustion</li>
+      <li><strong>Security Testing</strong> — Autonomous vulnerability scanning, logic flaw detection (XSS/SQLi), nmap, metasploit workflows built in</li>
+      <li><strong>Custom Providers</strong> — Bring any OpenAI- or Anthropic-compatible API as a selectable model</li>
+      <li><strong>Burp Suite MCP</strong> — Expose every Burp tool (Proxy, Repeater, Intruder, Scanner) to the agent</li>
+    </ul>
+
+    <div class="alert tip"><span class="alert-icon">✅</span><div class="alert-body"><strong>Free & Open Source</strong>Agent-2-Beta is MIT licensed. Clone it, modify it, self-host it for free.</div></div>
+    <div class="alert info"><span class="alert-icon">ℹ️</span><div class="alert-body"><strong>Requires Python 3.10+</strong>A Gemini API key is required (free tier available). All other dependencies are installed automatically by <code class="inline">run.py</code>.</div></div>
+
+    <div class="page-nav">
+      <div></div>
+      <a class="pg-btn next" onclick="showPage('install')"><div class="pg-dir">NEXT →</div><div class="pg-label">Installation</div></a>
+    </div>
+  </article>
+
+  <!-- ═══════════ PAGE: INSTALL ═══════════ -->
+  <article class="doc-page" id="page-install">
+    <h1 class="doc-title">Installation</h1>
+    <div class="doc-meta"><span class="tag">5 min setup</span><span class="tag">All platforms</span></div>
+    <p class="doc-intro">Agent-2 installs with a single command. The one-line installer downloads the repo, builds an isolated <code class="inline">.venv</code>, installs every dependency, and starts the app.</p>
+
+    <h2 class="doc-h2">One-line install (recommended)</h2>
+    <div class="code-block"><div class="code-header"><span class="code-lang">macOS / Linux</span><button class="code-copy" onclick="copyCode(this)">copy</button></div><pre class="code-body">curl -fsSL https://raw.githubusercontent.com/aaravshah1311/Agent-2-Beta/main/install.py | python3 -</pre></div>
+    <div class="code-block"><div class="code-header"><span class="code-lang">Windows PowerShell</span><button class="code-copy" onclick="copyCode(this)">copy</button></div><pre class="code-body">irm https://raw.githubusercontent.com/aaravshah1311/Agent-2-Beta/main/install.py | python -</pre></div>
+    <p class="doc-p">Prefer to clone manually? Follow the steps below.</p>
+
+    <h2 class="doc-h2">Prerequisites</h2>
+    <ul class="doc-ul">
+      <li><strong>Python 3.10+</strong> — required. Check: <code class="inline">python --version</code></li>
+      <li><strong>Git</strong> — for cloning</li>
+      <li><strong>Gemini API key</strong> — free at <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color:var(--cy)">aistudio.google.com/app/apikey</a></li>
+    </ul>
+
+    <h2 class="doc-h2">Install steps</h2>
+    <ul class="step-list">
+      <li><div class="step-n">1</div><div class="step-body"><div class="step-title">Clone the repository</div><div class="step-desc">Download Agent-2 from GitHub to your machine.</div></div></li>
+    </ul>
+    <div class="code-block"><div class="code-header"><span class="code-lang">bash</span><button class="code-copy" onclick="copyCode(this)">copy</button></div><pre class="code-body">git clone https://github.com/aaravshah1311/Agent-2-Beta.git
+cd Agent-2-Beta</pre></div>
+
+    <ul class="step-list">
+      <li><div class="step-n">2</div><div class="step-body"><div class="step-title">Run the launcher</div><div class="step-desc">This creates a venv, installs all packages, and starts the setup wizard.</div></div></li>
+    </ul>
+    <div class="code-block"><div class="code-header"><span class="code-lang">bash</span><button class="code-copy" onclick="copyCode(this)">copy</button></div><pre class="code-body">agent2</pre></div>
+
+    <div class="alert tip"><span class="alert-icon">💡</span><div class="alert-body"><strong>Windows users</strong>If <code class="inline">python</code> isn't found, try <code class="inline">py run.py</code> or install Python from the Microsoft Store.</div></div>
+
+    <ul class="step-list">
+      <li><div class="step-n">3</div><div class="step-body"><div class="step-title">Paste your Gemini API key</div><div class="step-desc">The wizard will prompt you. The key is saved to <code class="inline">agent2.db</code>.</div></div></li>
+      <li><div class="step-n">4</div><div class="step-body"><div class="step-title">Open the web UI</div><div class="step-desc">Navigate to <code class="inline">http://localhost:1311</code> in your browser.</div></div></li>
+    </ul>
+
+    <h2 class="doc-h2">What gets installed automatically</h2>
+    <div class="code-block"><div class="code-header"><span class="code-lang">packages</span></div><pre class="code-body">flask
+flask-socketio
+eventlet
+google-genai
+mcp
+rich
+prompt_toolkit</pre></div>
+    <p class="doc-p">All packages are installed into a local <code class="inline">.venv/</code> folder — nothing is installed globally.</p>
+
+    <h2 class="doc-h2">Uninstall</h2>
+    <div class="code-block"><div class="code-header"><span class="code-lang">bash</span><button class="code-copy" onclick="copyCode(this)">copy</button></div><pre class="code-body">agent2 --uninstall</pre></div>
+    <p class="doc-p">Removes the venv and generated files. Source code remains intact.</p>
+
+    <div class="page-nav">
+      <a class="pg-btn" onclick="showPage('overview')"><div class="pg-dir">← PREV</div><div class="pg-label">Overview</div></a>
+      <a class="pg-btn next" onclick="showPage('quickstart')"><div class="pg-dir">NEXT →</div><div class="pg-label">Quick Start</div></a>
+    </div>
+  </article>
+
+  <!-- ═══════════ PAGE: QUICKSTART ═══════════ -->
+  <article class="doc-page" id="page-quickstart">
+    <h1 class="doc-title">Quick Start</h1>
+    <p class="doc-intro">Get from clone to running agent in under 2 minutes.</p>
+
+    <h2 class="doc-h2">Start Web UI</h2>
+    <div class="code-block"><div class="code-header"><span class="code-lang">bash</span><button class="code-copy" onclick="copyCode(this)">copy</button></div><pre class="code-body">agent2         # or: agent2 --web
+# → Opens at http://localhost:1311</pre></div>
+
+    <h2 class="doc-h2">Start CLI Agent</h2>
+    <div class="code-block"><div class="code-header"><span class="code-lang">bash</span><button class="code-copy" onclick="copyCode(this)">copy</button></div><pre class="code-body">agent2 --cli
+
+# One-shot mode:
+.venv/bin/python agent2cli.py "portscan 10.10.1.1"
+.venv/bin/python agent2cli.py --model 2.5-flash "write a REST API"
+.venv/bin/python agent2cli.py --mode thinking "design this system"</pre></div>
+
+    <div class="alert warn"><span class="alert-icon">⚠️</span><div class="alert-body"><strong>First run — Web UI</strong>You must create a Workspace before chatting. Click <strong>+ Create Workspace</strong> in the sidebar, give it a name, and optionally a project path.</div></div>
+
+    <h2 class="doc-h2">Your first conversation</h2>
+    <div class="code-block"><div class="code-header"><span class="code-lang">example prompts</span></div><pre class="code-body"># Run a project
+run the project in /home/user/myapp
+
+# Security testing
+portscan 10.10.1.5
+enumerate http://target:8080 with gobuster
+
+# Code generation
+write a FastAPI REST API with JWT authentication
+
+# File ops
+read requirements.txt and tell me what's missing
+
+# Web search
+search for latest CVE for Apache 2.4.41</pre></div>
+
+    <div class="page-nav">
+      <a class="pg-btn" onclick="showPage('install')"><div class="pg-dir">← PREV</div><div class="pg-label">Installation</div></a>
+      <a class="pg-btn next" onclick="showPage('api-keys')"><div class="pg-dir">NEXT →</div><div class="pg-label">API Keys</div></a>
+    </div>
+  </article>
+
+  <!-- ═══════════ PAGE: API KEYS ═══════════ -->
+  <article class="doc-page" id="page-api-keys">
+    <h1 class="doc-title">API Keys</h1>
+    <p class="doc-intro">Agent-2 stores API keys in its <code class="inline">agent2.db</code> SQLite database. Multiple keys are supported and auto-rotated when one hits its quota.</p>
+
+    <h2 class="doc-h2">Get a free API key</h2>
+    <p class="doc-p">Gemini API keys are free. Visit <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color:var(--cy)">aistudio.google.com/app/apikey</a> — sign in with Google and create a key.</p>
+
+    <h2 class="doc-h2">Add your first key (via run.py)</h2>
+    <div class="code-block"><div class="code-header"><span class="code-lang">bash</span><button class="code-copy" onclick="copyCode(this)">copy</button></div><pre class="code-body">agent2 --addapi</pre></div>
+    <p class="doc-p">The wizard walks you through pasting a key interactively. You can add multiple keys for failover.</p>
+
+    <h2 class="doc-h2">Add a key inside the CLI</h2>
+    <div class="code-block"><div class="code-header"><span class="code-lang">cli</span><button class="code-copy" onclick="copyCode(this)">copy</button></div><pre class="code-body">/addapi</pre></div>
+    <p class="doc-p">Saves the key to <code class="inline">agent2.db</code> immediately. Active on the very next request.</p>
+
+    <h2 class="doc-h2">Manage keys in the UI</h2>
+    <p class="doc-p">Open <strong>Settings &rarr; Keys</strong> in the web UI to add, rename, pin, reset, or delete keys and watch per-key token usage live. You can store up to 9 keys, all auto-rotated on quota.</p>
+    <div class="alert info"><span class="alert-icon">&#128268;</span><div class="alert-body"><strong>Bring your own model</strong>Beyond Gemini, add any OpenAI- or Anthropic-compatible endpoint under <strong>Settings &rarr; Providers</strong> (or <code class="inline">/provider add</code> in the CLI). It appears in the same model dropdown.</div></div>
+
+    <h2 class="doc-h2">How rotation works</h2>
+    <ul class="doc-ul">
+      <li>Agent-2 always uses the first active key</li>
+      <li>If a key returns a 429 (quota exhausted), it's marked inactive and the next key is tried automatically</li>
+      <li>If all keys are exhausted, they all reset and the cycle starts over</li>
+      <li>You can manually <strong>pin</strong> a key in the web UI Settings → Keys panel</li>
+    </ul>
+
+    <div class="alert info"><span class="alert-icon">🔑</span><div class="alert-body"><strong>Check key status in the CLI</strong>Type <code class="inline">/keys</code> to see all keys, their active status, and per-key token usage.</div></div>
+
+    <div class="page-nav">
+      <a class="pg-btn" onclick="showPage('quickstart')"><div class="pg-dir">← PREV</div><div class="pg-label">Quick Start</div></a>
+      <a class="pg-btn next" onclick="showPage('models')"><div class="pg-dir">NEXT →</div><div class="pg-label">Models & Modes</div></a>
+    </div>
+  </article>
+
+  <!-- ═══════════ PAGE: MODELS ═══════════ -->
+  <article class="doc-page" id="page-models">
+    <h1 class="doc-title">Models & Modes</h1>
+    <p class="doc-intro">Switch models and modes anytime — in the topbar (Web UI) or with slash commands (CLI).</p>
+
+    <h2 class="doc-h2">Available Models</h2>
+    <table class="flag-table">
+      <thead><tr><th>Key</th><th>Model</th><th>Group</th></tr></thead>
+      <tbody>
+        <tr><td>2.5-flash</td><td>Gemini 2.5 Flash (default)</td><td>2.5</td></tr>
+        <tr><td>2.5-pro</td><td>Gemini 2.5 Pro</td><td>2.5</td></tr>
+        <tr><td>3.1-flash</td><td>Gemini 3.1 Flash</td><td>3.1</td></tr>
+        <tr><td>3.1-pro</td><td>Gemini 3.1 Pro</td><td>3.1</td></tr>
+      </tbody>
+    </table>
+
+    <div class="alert warn"><span class="alert-icon">⚠️</span><div class="alert-body"><strong>Model availability</strong>Some models may not be available on all API key tiers. If you get an empty response, switch to <code class="inline">2.5-flash</code>.</div></div>
+
+    <h2 class="doc-h2">Reasoning Modes</h2>
+    <table class="flag-table">
+      <thead><tr><th>Mode</th><th>Max Tokens</th><th>Best for</th></tr></thead>
+      <tbody>
+        <tr><td>fast ⚡</td><td>2,048</td><td>Quick answers, simple commands, lowest cost</td></tr>
+        <tr><td>pro ★</td><td>8,192</td><td>Most tasks — recommended default</td></tr>
+        <tr><td>thinking 🧠</td><td>16,384</td><td>Hard architecture, complex debugging (2.5/3.1 only)</td></tr>
+      </tbody>
+    </table>
+
+    <h2 class="doc-h2">Switching models in CLI</h2>
+    <div class="code-block"><div class="code-header"><span class="code-lang">cli</span><button class="code-copy" onclick="copyCode(this)">copy</button></div><pre class="code-body">/model 2.5-flash       # switch to 2.5 Flash
+/model 3.1-pro         # switch to 3.1 Pro
+/mode thinking         # enable thinking mode
+/mode fast             # fastest, cheapest</pre></div>
+
+    <div class="page-nav">
+      <a class="pg-btn" onclick="showPage('api-keys')"><div class="pg-dir">← PREV</div><div class="pg-label">API Keys</div></a>
+      <a class="pg-btn next" onclick="showPage('workspaces')"><div class="pg-dir">NEXT →</div><div class="pg-label">Workspaces</div></a>
+    </div>
+  </article>
+
+  <!-- ═══════════ PAGE: WORKSPACES ═══════════ -->
+  <article class="doc-page" id="page-workspaces">
+    <h1 class="doc-title">Workspaces</h1>
+    <p class="doc-intro">Every chat belongs to a workspace. The agent always knows your project path, framework, and accumulated memories for that workspace.</p>
+
+    <h2 class="doc-h2">Create a workspace</h2>
+    <ul class="step-list">
+      <li><div class="step-n">1</div><div class="step-body"><div class="step-title">Click + Create Workspace in the sidebar</div><div class="step-desc">Opens the workspace creation modal.</div></div></li>
+      <li><div class="step-n">2</div><div class="step-body"><div class="step-title">Enter a name and optional project path</div><div class="step-desc">Leave path blank → Agent-2 creates a <code class="inline">workspaces/YourName/</code> folder automatically. Or browse with the built-in path browser.</div></div></li>
+      <li><div class="step-n">3</div><div class="step-body"><div class="step-title">Click the workspace to enter it</div><div class="step-desc">Then create a new chat. Every chat inside a workspace inherits its context.</div></div></li>
+    </ul>
+
+    <h2 class="doc-h2">What the agent knows inside a workspace</h2>
+    <ul class="doc-ul">
+      <li>The absolute path to the project folder</li>
+      <li>The detected framework, language, and package manager</li>
+      <li>All memories accumulated in this workspace</li>
+      <li>The last working directory for terminal commands</li>
+    </ul>
+
+    <h2 class="doc-h2">CLI workspace</h2>
+
+    <div class="page-nav">
+      <a class="pg-btn" onclick="showPage('models')"><div class="pg-dir">← PREV</div><div class="pg-label">Models & Modes</div></a>
+      <a class="pg-btn next" onclick="showPage('web-ui')"><div class="pg-dir">NEXT →</div><div class="pg-label">Web UI Guide</div></a>
+    </div>
+  </article>
+
+  <!-- ═══════════ PAGE: WEB UI ═══════════ -->
+  <article class="doc-page" id="page-web-ui">
+    <h1 class="doc-title">Web UI Guide</h1>
+    <p class="doc-intro">The web interface runs at <code class="inline">http://localhost:1311</code>. It combines a workspace sidebar, chat panel, and real terminal in one view.</p>
+
+    <h2 class="doc-h2">Interface layout</h2>
+    <ul class="doc-ul">
+      <li><strong>Sidebar (left)</strong> — workspace list → click a workspace → chat list</li>
+      <li><strong>Topbar</strong> — current workspace name, model/mode selector, token counter</li>
+      <li><strong>Chat panel (centre)</strong> — conversations with tool call blocks and plan cards</li>
+      <li><strong>Terminal panel (right)</strong> — multi-tab xterm.js terminals, drag-resizable</li>
+    </ul>
+
+    <h2 class="doc-h2">Terminal features</h2>
+    <ul class="doc-ul">
+      <li><strong>↑ / ↓ arrow keys</strong> — navigate command history (up to 200 commands per tab)</li>
+      <li><strong>Esc</strong> — clear the input field</li>
+      <li><strong>▶ run button</strong> on tool blocks — click to run that command in the active terminal</li>
+      <li><strong>+ Term</strong> — open a new terminal tab</li>
+      <li><strong>■ kill</strong> — first click sends SIGTERM; second click (or after 3s) force-kills with SIGKILL</li>
+      <li><strong>stdin row</strong> — appears when a process is running; type to send input to interactive programs</li>
+    </ul>
+
+    <h2 class="doc-h2">Editing messages</h2>
+    <p class="doc-p">Hover any of your messages → click the ✏️ pencil icon → edit the text → press Enter. Agent-2 deletes that message and everything after it, then re-runs from the edited point.</p>
+
+    <h2 class="doc-h2">File attachments</h2>
+    <p class="doc-p">Click 📎 in the input bar to attach code files, images, PDFs, or text. Text files are embedded verbatim; images and PDFs are sent as binary blobs to Gemini's vision API.</p>
+
+    <h2 class="doc-h2">Stopping generation</h2>
+    <p class="doc-p">Click the ⏹ red stop button (appears during generation) to cancel mid-flight. The agent checks for the stop signal before each API call and before running each command.</p>
+
+    <div class="page-nav">
+      <a class="pg-btn" onclick="showPage('workspaces')"><div class="pg-dir">← PREV</div><div class="pg-label">Workspaces</div></a>
+      <a class="pg-btn next" onclick="showPage('cli')"><div class="pg-dir">NEXT →</div><div class="pg-label">CLI Agent</div></a>
+    </div>
+  </article>
+
+  <!-- ═══════════ PAGE: CLI ═══════════ -->
+  <article class="doc-page" id="page-cli">
+    <h1 class="doc-title">CLI Agent</h1>
+    <p class="doc-intro">The CLI agent (<code class="inline">agent2cli.py</code>) is a full-featured terminal agent with the same tools and memory as the web UI.</p>
+
+    <h2 class="doc-h2">Start the CLI</h2>
+    <div class="code-block"><div class="code-header"><span class="code-lang">bash</span><button class="code-copy" onclick="copyCode(this)">copy</button></div><pre class="code-body">agent2 --cli
+
+# Or directly:
+.venv/bin/python agent2cli.py          # macOS / Linux
+.venv\Scripts\python agent2cli.py      # Windows</pre></div>
+
+    <h2 class="doc-h2">One-shot mode</h2>
+    <div class="code-block"><div class="code-header"><span class="code-lang">bash</span><button class="code-copy" onclick="copyCode(this)">copy</button></div><pre class="code-body">.venv/bin/python agent2cli.py "portscan 10.10.1.1"
+.venv/bin/python agent2cli.py --model 2.5-flash "explain this error"
+.venv/bin/python agent2cli.py --mode thinking "design this architecture"
+.venv/bin/python agent2cli.py --clear "start fresh"</pre></div>
+
+    <h2 class="doc-h2">The prompt</h2>
+    <div class="code-block"><div class="code-header"><span class="code-lang">prompt format</span></div><pre class="code-body">you [workspace|model|mode]> _</pre></div>
+    <p class="doc-p">The prompt shows your active workspace, current model, and mode icon (⚡★🧠) at all times.</p>
+
+    <h2 class="doc-h2">Memory in CLI</h2>
+    <p class="doc-p">Memory is stored in <code class="inline">~/.agent2/memories.json</code> and persists across all CLI sessions. Conversation history is stored in <code class="inline">~/.agent2/history.json</code>.</p>
+
+    <div class="page-nav">
+      <a class="pg-btn" onclick="showPage('web-ui')"><div class="pg-dir">← PREV</div><div class="pg-label">Web UI Guide</div></a>
+      <a class="pg-btn next" onclick="showPage('tools')"><div class="pg-dir">NEXT →</div><div class="pg-label">Agent Tools</div></a>
+    </div>
+  </article>
+
+  <!-- ═══════════ PAGE: TOOLS ═══════════ -->
+  <article class="doc-page" id="page-tools">
+    <h1 class="doc-title">Agent Tools</h1>
+    <p class="doc-intro">Agent-2 has 8 built-in tools. The agent selects them automatically based on your prompt — you don't need to invoke them manually.</p>
+
+    <table class="flag-table">
+      <thead><tr><th>Tool</th><th>When it's used</th></tr></thead>
+      <tbody>
+        <tr><td>run_command</td><td>Run, execute, install, build, scan, test, launch, start</td></tr>
+        <tr><td>read_file</td><td>Read, show, inspect, view any file</td></tr>
+        <tr><td>write_file</td><td>Create, write, save, generate a file</td></tr>
+        <tr><td>scan_project</td><td>Scan, analyze, and map entire project directory structure and tech stack</td></tr>
+        <tr><td>multi_edit_files</td><td>Edit or write multiple files simultaneously across the codebase</td></tr>
+        <tr><td>web_search</td><td>Search, find, lookup, CVEs, docs, error messages</td></tr>
+        <tr><td>save_memory</td><td>Remember, note, save — stores to persistent memory</td></tr>
+        <tr><td>emit_plan</td><td>Complex 3+ step tasks — emits a visible plan first</td></tr>
+      </tbody>
+    </table>
+
+    <h2 class="doc-h2">Tool call blocks (Web UI)</h2>
+    <p class="doc-p">Every tool call appears as a collapsible block in the chat. For <code class="inline">run_command</code> tools, a <strong>▶ run</strong> button lets you re-run that exact command in the active terminal tab.</p>
+
+    <div class="page-nav">
+      <a class="pg-btn" onclick="showPage('cli')"><div class="pg-dir">← PREV</div><div class="pg-label">CLI Agent</div></a>
+      <a class="pg-btn next" onclick="showPage('memory')"><div class="pg-dir">NEXT →</div><div class="pg-label">Memory System</div></a>
+    </div>
+  </article>
+
+  <!-- ═══════════ PAGE: MEMORY ═══════════ -->
+  <article class="doc-page" id="page-memory">
+    <h1 class="doc-title">Memory System</h1>
+    <p class="doc-intro">Agent-2's memory engine extracts facts from every conversation and persists them across sessions — the agent gets smarter the more you use it.</p>
+
+    <h2 class="doc-h2">Memory types</h2>
+    <table class="flag-table">
+      <thead><tr><th>Type</th><th>Scope</th><th>Source</th></tr></thead>
+      <tbody>
+        <tr><td>global</td><td>All conversations</td><td>Added manually by user</td></tr>
+        <tr><td>workspace</td><td>One workspace only</td><td>Added manually or by agent</td></tr>
+        <tr><td>auto</td><td>Global or workspace</td><td>Extracted automatically after each response</td></tr>
+      </tbody>
+    </table>
+
+    <h2 class="doc-h2">Auto-extraction</h2>
+    <p class="doc-p">After every agent response, a background thread calls Gemini to extract memorable facts (user preferences, project details, environment configs, etc.) and saves them with an importance score 1–10.</p>
+
+    <h2 class="doc-h2">Manage memories</h2>
+    <div class="code-block"><div class="code-header"><span class="code-lang">cli</span><button class="code-copy" onclick="copyCode(this)">copy</button></div><pre class="code-body">/memory              # list all memories with importance scores
+/addmem Python 3.12 is installed on this machine   # add manually</pre></div>
+    <p class="doc-p">In the Web UI, open <strong>Mem</strong> in the sidebar footer → three tabs: Global / Workspace / Auto-learned.</p>
+
+    <div class="page-nav">
+      <a class="pg-btn" onclick="showPage('tools')"><div class="pg-dir">← PREV</div><div class="pg-label">Agent Tools</div></a>
+      <a class="pg-btn next" onclick="showPage('security')"><div class="pg-dir">NEXT →</div><div class="pg-label">Security Testing</div></a>
+    </div>
+  </article>
+
+  <!-- ═══════════ PAGE: SECURITY ═══════════ -->
+  <article class="doc-page" id="page-security">
+    <h1 class="doc-title">Security Testing</h1>
+    <p class="doc-intro">Agent-2 is purpose-built for security research and CTF work. It executes full tool chains, reads every output line, adapts strategy, and keeps going until the job is done.</p>
+
+    <h2 class="doc-h2">Example prompts</h2>
+    <div class="code-block"><div class="code-header"><span class="code-lang">prompts</span><button class="code-copy" onclick="copyCode(this)">copy</button></div><pre class="code-body">portscan 10.10.1.1
+enumerate http://target:8080 with gobuster
+run sqlmap on http://target/login?id=1
+check for open ports on localhost
+scan for vulnerabilities on 192.168.1.0/24
+brute force SSH on 10.10.1.5 with hydra
+search CVE for Apache 2.4.41</pre></div>
+
+    <h2 class="doc-h2">Supported tools</h2>
+    <p class="doc-p">nmap · nikto · gobuster · ffuf · sqlmap · hydra · metasploit · searchsploit · theharvester · binwalk · volatility · netcat · wireshark · hashcat · john · wfuzz · dirb</p>
+
+    <h2 class="doc-h2">Kill-chain execution</h2>
+    <p class="doc-p">For comprehensive pentests, Agent-2 automatically sequences: host discovery → port scan → service enumeration → CVE lookup → web enumeration → exploitation → post-exploitation → report.</p>
+
+    <div class="alert err"><span class="alert-icon">⚠️</span><div class="alert-body"><strong>Legal notice</strong>Only use Agent-2 for security testing on systems you own or have explicit written permission to test. Unauthorized testing is illegal.</div></div>
+
+    <div class="page-nav">
+      <a class="pg-btn" onclick="showPage('memory')"><div class="pg-dir">← PREV</div><div class="pg-label">Memory System</div></a>
+      <a class="pg-btn next" onclick="showPage('burp')"><div class="pg-dir">NEXT →</div><div class="pg-label">Burp Suite MCP</div></a>
+    </div>
+  </article>
+
+  <!-- ═══════════ PAGE: BURP SUITE MCP ═══════════ -->
+  <article class="doc-page" id="page-burp">
+    <h1 class="doc-title">Burp Suite MCP</h1>
+    <div class="doc-meta"><span class="tag">Web Security</span><span class="tag">MCP Bridge</span><span class="tag">PortSwigger</span></div>
+    <p class="doc-intro">Agent-2 connects to <strong>Burp Suite's official MCP server</strong> and hands every Burp tool — Proxy history, Repeater, Intruder, Scanner, site map, active-scan issues, raw HTTP requests — straight to the AI agent. Ask in plain English; the agent drives Burp for you.</p>
+
+    <div class="alert info"><span class="alert-icon">🕷️</span><div class="alert-body"><strong>What is MCP?</strong>The Model Context Protocol is an open standard that lets an AI agent call an external tool's functions. PortSwigger ships an official <em>MCP Server</em> extension for Burp; Agent-2 speaks to it over a local SSE connection and exposes each Burp capability as an agent tool named <code class="inline">burp_*</code>.</div></div>
+
+    <h2 class="doc-h2">What you get</h2>
+    <ul class="doc-ul">
+      <li><strong>Proxy history access</strong> — the agent can read captured requests/responses and reason over your live traffic.</li>
+      <li><strong>Send &amp; replay requests</strong> — issue raw HTTP requests through Burp (Repeater-style) and read the response inline.</li>
+      <li><strong>Intruder &amp; Scanner</strong> — launch and read results from Burp's fuzzing and active/passive scans, subject to what your Burp edition exposes.</li>
+      <li><strong>Site map &amp; issues</strong> — pull the discovered site map and active-scan issue list to prioritise findings.</li>
+      <li><strong>Every tool, automatically</strong> — whatever tools the MCP server advertises are discovered at connect time and offered to the model — no per-tool wiring.</li>
+      <li><strong>Works in both agents</strong> — the same bridge powers the Web UI and the CLI, and is exposed to custom OpenAI/Anthropic providers too.</li>
+    </ul>
+
+    <div class="alert warn"><span class="alert-icon">⚠️</span><div class="alert-body"><strong>Burp edition matters</strong>The Scanner and some Intruder features require <strong>Burp Suite Professional</strong>. Proxy history, site map, and request replay work on <strong>Community</strong> edition. Agent-2 shows exactly which tools your Burp exposes after connecting.</div></div>
+
+    <h2 class="doc-h2">Step 1 — Install the MCP server in Burp</h2>
+    <ul class="step-list">
+      <li><div class="step-n">1</div><div class="step-body"><div class="step-title">Open Burp → Extensions → BApp Store</div><div class="step-desc">Search for <strong>“MCP Server”</strong> (published by PortSwigger) and click <strong>Install</strong>.</div></div></li>
+      <li><div class="step-n">2</div><div class="step-body"><div class="step-title">Open the new “MCP” tab</div><div class="step-desc">Tick <strong>“Enabled”</strong>. Note the listening address — it defaults to <code class="inline">127.0.0.1</code> port <code class="inline">9876</code>.</div></div></li>
+      <li><div class="step-n">3</div><div class="step-body"><div class="step-title">Leave Burp running</div><div class="step-desc">Keep Burp open with the MCP server enabled while you use Agent-2.</div></div></li>
+    </ul>
+
+    <div class="alert tip"><span class="alert-icon">💡</span><div class="alert-body"><strong>Endpoint</strong>Agent-2 talks to the SSE endpoint at <code class="inline">http://127.0.0.1:9876/sse</code>. You can paste either the bare host (<code class="inline">http://127.0.0.1:9876</code>) or the full <code class="inline">/sse</code> URL — Agent-2 tries both.</div></div>
+
+    <h2 class="doc-h2">Step 2 — Connect from Agent-2</h2>
+
+    <h3 class="doc-h3">Web UI</h3>
+    <ul class="step-list">
+      <li><div class="step-n">1</div><div class="step-body"><div class="step-title">Open Settings → Burp</div><div class="step-desc">Click the gear icon, then the <strong>Burp</strong> tab.</div></div></li>
+      <li><div class="step-n">2</div><div class="step-body"><div class="step-title">Confirm the URL and click Connect</div><div class="step-desc">The status dot turns green and shows the number of tools discovered. A chip list of every Burp tool appears below.</div></div></li>
+      <li><div class="step-n">3</div><div class="step-body"><div class="step-title">(Optional) Enable Auto-connect</div><div class="step-desc">Toggle <strong>Auto-connect</strong> so Agent-2 re-establishes the Burp bridge automatically on every turn. This preference is saved and shared with the CLI.</div></div></li>
+    </ul>
+
+    <h3 class="doc-h3">CLI</h3>
+    <div class="code-block"><div class="code-header"><span class="code-lang">cli</span><button class="code-copy" onclick="copyCode(this)">copy</button></div><pre class="code-body">/burp connect        # connect to Burp's MCP server
+/burp status         # show connection state, URL, tool count
+/burp list           # list every Burp tool now available to the agent
+/burp disconnect     # drop the bridge</pre></div>
+
+    <h2 class="doc-h2">Step 3 — Use it</h2>
+    <p class="doc-p">Once connected, just talk to the agent — it picks the right Burp tool on its own:</p>
+    <div class="code-block"><div class="code-header"><span class="code-lang">example prompts</span></div><pre class="code-body">show me the last 20 requests from Burp proxy history
+replay the login POST to /api/session and show the response headers
+find every request that set a Set-Cookie header
+resend that request with the id parameter changed to 1 OR 1=1
+what active-scan issues has Burp found for this host?
+summarise the site map Burp has discovered so far</pre></div>
+
+    <h2 class="doc-h2">Configuration reference</h2>
+    <table class="flag-table">
+      <thead><tr><th>Setting</th><th>Default</th><th>What it does</th></tr></thead>
+      <tbody>
+        <tr><td><code class="inline">BURP_MCP_URL</code></td><td>http://127.0.0.1:9876</td><td>Base URL of Burp's MCP server (env var override).</td></tr>
+        <tr><td><code class="inline">BURP_MCP_ENABLED</code></td><td>0 (off)</td><td>Initial default for auto-connect if never toggled in the UI.</td></tr>
+        <tr><td>Auto-connect toggle</td><td>off</td><td>When on, Agent-2 connects to Burp every agent turn. Persisted in <code class="inline">agent2.db</code>, shared by web + CLI.</td></tr>
+        <tr><td>Tool namespace</td><td><code class="inline">burp_*</code></td><td>Every Burp tool is exposed to the model under a sanitised <code class="inline">burp_</code> name.</td></tr>
+      </tbody>
+    </table>
+
+    <h2 class="doc-h2">Troubleshooting</h2>
+    <table class="trouble-table">
+      <thead><tr><th>Problem</th><th>Solution</th></tr></thead>
+      <tbody>
+        <tr><td>“mcp package not installed”</td><td>Run <code class="inline">agent2 --reset</code> (or <code class="inline">pip install mcp</code> inside the .venv) and retry.</td></tr>
+        <tr><td>Timed out connecting</td><td>Is Burp running with the <strong>MCP Server</strong> BApp <em>Enabled</em>? Check the MCP tab’s address matches your URL.</td></tr>
+        <tr><td>Connected but 0 tools</td><td>Re-tick “Enabled” in Burp’s MCP tab, then <code class="inline">/burp connect</code> again.</td></tr>
+        <tr><td>Scanner tools missing</td><td>Active Scanner requires Burp Suite <strong>Professional</strong>; Community exposes Proxy/site-map/replay only.</td></tr>
+        <tr><td>Wrong port</td><td>Set <code class="inline">BURP_MCP_URL</code> or paste the correct <code class="inline">http://127.0.0.1:PORT</code> in Settings → Burp.</td></tr>
+      </tbody>
+    </table>
+
+    <div class="alert err"><span class="alert-icon">⚠️</span><div class="alert-body"><strong>Authorized testing only</strong>The Burp bridge lets the agent send live traffic to targets. Only drive it against systems you own or are explicitly authorized to test.</div></div>
+
+    <div class="page-nav">
+      <a class="pg-btn" onclick="showPage('security')"><div class="pg-dir">← PREV</div><div class="pg-label">Security Testing</div></a>
+      <a class="pg-btn next" onclick="showPage('run-flags')"><div class="pg-dir">NEXT →</div><div class="pg-label">run.py Flags</div></a>
+    </div>
+  </article>
+
+  <!-- ═══════════ PAGE: RUN FLAGS ═══════════ -->
+  <article class="doc-page" id="page-run-flags">
+    <h1 class="doc-title">run.py Flags</h1>
+    <p class="doc-intro">All Agent-2 operations go through <code class="inline">run.py</code> — setup, launch, key management, and uninstall.</p>
+
+    <table class="flag-table">
+      <thead><tr><th>Flag</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td>agent2</td><td>Setup + start Web UI (default)</td></tr>
+        <tr><td>--web</td><td>Explicitly start Web UI</td></tr>
+        <tr><td>--cli</td><td>Start CLI agent</td></tr>
+        <tr><td>--addapi</td><td>Interactively add one or more API keys to agent2.db</td></tr>
+        <tr><td>--update</td><td>Update to the latest code (keeps agent2.db); <code class="inline">-up</code> also works</td></tr>
+        <tr><td>--reset</td><td>Wipe the .venv and reinstall all dependencies</td></tr>
+        <tr><td>--uninstall</td><td>Remove venv and generated files, keep source</td></tr>
+        <tr><td>-h</td><td>Show the help menu</td></tr>
+      </tbody>
+    </table>
+
+    <div class="page-nav">
+      <a class="pg-btn" onclick="showPage('burp')"><div class="pg-dir">← PREV</div><div class="pg-label">Burp Suite MCP</div></a>
+      <a class="pg-btn next" onclick="showPage('cli-cmds')"><div class="pg-dir">NEXT →</div><div class="pg-label">CLI Commands</div></a>
+    </div>
+  </article>
+
+  <!-- ═══════════ PAGE: CLI COMMANDS ═══════════ -->
+  <article class="doc-page" id="page-cli-cmds">
+    <h1 class="doc-title">CLI Commands Reference</h1>
+    <p class="doc-intro">All slash commands available inside the Agent-2 CLI REPL.</p>
+
+    <table class="flag-table">
+      <thead><tr><th>Command</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td>/help</td><td>Show all available commands</td></tr>
+        <tr><td>/addapi</td><td>Add a Gemini API key to agent2.db</td></tr>
+        <tr><td>/keys</td><td>Show all key status and per-key token usage</td></tr>
+        <tr><td>/model [name]</td><td>Switch model — shows list if no name given</td></tr>
+        <tr><td>/mode [name]</td><td>Switch mode: fast · pro · thinking</td></tr>
+        <tr><td>/provider &hellip;</td><td>Manage custom providers: add &middot; list &middot; use &middot; del &middot; test</td></tr>
+        <tr><td>/burp &hellip;</td><td>Burp Suite MCP bridge: connect &middot; disconnect &middot; list &middot; status</td></tr>
+        <tr><td>/theme &middot; /color</td><td>Switch the CLI colour theme / accent colour</td></tr>
+        <tr><td>/scan &lt;path&gt;</td><td>Scan and analyze an entire project directory</td></tr>
+        <tr><td>/clear</td><td>Clear the screen (keeps history)</td></tr>
+        <tr><td>/shrink</td><td>Summarize &amp; shrink history to save tokens</td></tr>
+        <tr><td>/clearhistory</td><td>Clear the conversation history</td></tr>
+        <tr><td>/history</td><td>Show last 10 messages</td></tr>
+        <tr><td>/memory</td><td>List all saved memories with importance scores</td></tr>
+        <tr><td>/addmem &lt;text&gt;</td><td>Save a memory manually</td></tr>
+        <tr><td>/run &lt;cmd&gt;</td><td>Run a shell command directly</td></tr>
+        <tr><td>/read &lt;file&gt;</td><td>Read and display a file</td></tr>
+        <tr><td>/search &lt;query&gt;</td><td>Web search via DuckDuckGo</td></tr>
+        <tr><td>/exit · Ctrl+C</td><td>Quit the CLI agent</td></tr>
+      </tbody>
+    </table>
+
+    <div class="page-nav">
+      <a class="pg-btn" onclick="showPage('run-flags')"><div class="pg-dir">← PREV</div><div class="pg-label">run.py Flags</div></a>
+      <a class="pg-btn next" onclick="showPage('troubleshoot')"><div class="pg-dir">NEXT →</div><div class="pg-label">Troubleshooting</div></a>
+    </div>
+  </article>
+
+  <!-- ═══════════ PAGE: TROUBLESHOOT ═══════════ -->
+  <article class="doc-page" id="page-troubleshoot">
+    <h1 class="doc-title">Troubleshooting</h1>
+    <p class="doc-intro">Common problems and their solutions.</p>
+
+    <table class="trouble-table">
+      <thead><tr><th>Problem</th><th>Solution</th></tr></thead>
+      <tbody>
+        <tr><td>No API keys configured</td><td>Run <code class="inline">agent2 --addapi</code> or type <code class="inline">/addapi</code> in the CLI.</td></tr>
+        <tr><td>Key quota exhausted</td><td>Keys rotate automatically. Add more keys: <code class="inline">agent2 --addapi</code></td></tr>
+        <tr><td>Model returns empty response</td><td>The model tier may not support that model. Switch: <code class="inline">/model 2.5-flash</code></td></tr>
+        <tr><td>Terminal not showing output</td><td>Refresh the browser tab. Socket connection may have dropped.</td></tr>
+        <tr><td>python not found on Windows</td><td>Use <code class="inline">py run.py</code> or install Python from the Microsoft Store.</td></tr>
+        <tr><td>Port 1311 already in use</td><td>Change <code class="inline">port=1311</code> in <code class="inline">agent2web.py</code> to another port.</td></tr>
+        <tr><td>Broken venv / import errors</td><td>Run <code class="inline">agent2 --reset</code> — wipes and reinstalls.</td></tr>
+        <tr><td>CLI spinner stuck</td><td><code class="inline">Ctrl+C</code> — cancels the request cleanly and returns to prompt.</td></tr>
+        <tr><td>rich not installed</td><td><code class="inline">agent2 --reset</code> — rich is now in the install list.</td></tr>
+        <tr><td>Want to start completely fresh</td><td><code class="inline">agent2 --uninstall</code> then <code class="inline">agent2</code></td></tr>
+        <tr><td>agent2cli.py not found</td><td>Place <code class="inline">agent2cli.py</code> in the same folder as <code class="inline">run.py</code>.</td></tr>
+        <tr><td>Thinking mode not working</td><td>Thinking is only available on 2.5/3.1 models (2.5-flash, 2.5-pro, 3.1-flash, 3.1-pro).</td></tr>
+      </tbody>
+    </table>
+
+    <h2 class="doc-h2">Still stuck?</h2>
+    <p class="doc-p">Open an issue on <a href="https://github.com/aaravshah1311/Agent-2-Beta/issues" target="_blank" style="color:var(--cy)">GitHub Issues</a> with your OS, Python version, and the exact error message. Or email <a href="mailto:aaravprogrammers@gmail.com" style="color:var(--cy)">aaravprogrammers@gmail.com</a>.</p>
+
+    <div class="page-nav">
+      <a class="pg-btn" onclick="showPage('cli-cmds')"><div class="pg-dir">← PREV</div><div class="pg-label">CLI Commands</div></a>
+      <a class="pg-btn next" onclick="showPage('pro')"><div class="pg-dir">NEXT →</div><div class="pg-label">Agent-2-Pro</div></a>
+    </div>
+  </article>
+
+  <!-- ═══════════ PAGE: PRO ═══════════ -->
+  <article class="doc-page" id="page-pro">
+    <h1 class="doc-title">Agent-2-Pro</h1>
+    <p class="doc-intro">The professional, private-release evolution of Agent-2-Beta — a proper Software Engineer and Brutal Pentester.</p>
+
+    <div class="alert warn"><span class="alert-icon">🔴</span><div class="alert-body"><strong>Private Edition</strong>Agent-2-Pro is not open source. Contact <a href="mailto:aaravprogrammers@gmail.com" style="color:var(--or)">aaravprogrammers@gmail.com</a> to request access.</div></div>
+
+    <h2 class="doc-h2">Pro-exclusive features</h2>
+    <table class="flag-table">
+      <thead><tr><th>Feature</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td>Software Engineering Mode</td><td>Analyze prompt → architect → engineer full multi-file project in self-correcting steps</td></tr>
+        <tr><td>DeepDive</td><td>Break one complex task into precise sub-tasks, solve each, assemble final result</td></tr>
+        <tr><td>Brutal Pentester</td><td>Full kill-chain: recon → enum → exploit → post-exploit → report</td></tr>
+        <tr><td>QA Mode</td><td>Auto-generate unit tests, integration tests, edge-case coverage</td></tr>
+        <tr><td>Project Space</td><td>Persistent project contexts with full history, file tree, and memory</td></tr>
+        <tr><td>Self-correction Loop</td><td>Agent reviews output, identifies errors, reruns until correct</td></tr>
+        <tr><td>Pentest Reports</td><td>Auto-generated markdown/HTML reports with CVEs, CVSS, remediation</td></tr>
+        <tr><td>Git & Docker Ops</td><td>Git operations, Docker build/run, container management</td></tr>
+      </tbody>
+    </table>
+
+    <h2 class="doc-h2">Get access</h2>
+    <p class="doc-p">Email <a href="mailto:aaravprogrammers@gmail.com" style="color:var(--or)">aaravprogrammers@gmail.com</a> with:</p>
+    <ul class="doc-ul">
+      <li>What you want to use Pro for (dev / security / research / commercial)</li>
+      <li>Your platform (Windows / macOS / Linux)</li>
+      <li>Any specific workflows you need</li>
+    </ul>
+
+    <div class="page-nav">
+      <a class="pg-btn" onclick="showPage('troubleshoot')"><div class="pg-dir">← PREV</div><div class="pg-label">Troubleshooting</div></a>
+      <div></div>
+    </div>
+  </article>
+</main>
+
+<!-- Right TOC -->
+<div id="toc">
+  <div class="toc-title">On this page</div>
+  <div id="toc-links"></div>
+</div>
+</div>
+
+<script>
+// ── Navigation ─────────────────────────────────────────────────────────────────
+const pages={
+  overview:'Overview', install:'Installation', quickstart:'Quick Start',
+  'api-keys':'API Keys', models:'Models & Modes', workspaces:'Workspaces',
+  'web-ui':'Web UI Guide', cli:'CLI Agent', tools:'Agent Tools',
+  memory:'Memory System', security:'Security Testing', burp:'Burp Suite MCP',
+  'run-flags':'run.py Flags', 'cli-cmds':'CLI Commands',
+  troubleshoot:'Troubleshooting', pro:'Agent-2-Pro'
+};
+
+function showPage(id){
+  document.querySelectorAll('.doc-page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.sb-link').forEach(l=>l.classList.remove('active'));
+  const page=document.getElementById('page-'+id);
+  if(page) page.classList.add('active');
+  const links=document.querySelectorAll('.sb-link');
+  links.forEach(l=>{ if(l.getAttribute('onclick')&&l.getAttribute('onclick').includes("'"+id+"'")) l.classList.add('active'); });
+  document.getElementById('breadcrumb-current').textContent=pages[id]||id;
+  buildTOC(page);
+  window.scrollTo({top:0,behavior:'smooth'});
+  document.getElementById('content').scrollTo({top:0});
+  closeSidebar();
+}
+
+// ── TOC ────────────────────────────────────────────────────────────────────────
+function buildTOC(page){
+  const tc=document.getElementById('toc-links');
+  if(!page||!tc){return;}
+  tc.innerHTML='';
+  page.querySelectorAll('h2.doc-h2').forEach(h=>{
+    if(!h.id) h.id='h-'+Math.random().toString(36).slice(2,7);
+    const a=document.createElement('a');
+    a.className='toc-link'; a.href='#'+h.id; a.textContent=h.textContent;
+    a.onclick=(e)=>{e.preventDefault();h.scrollIntoView({behavior:'smooth'});};
+    tc.appendChild(a);
+  });
+}
+
+// ── Mobile sidebar ─────────────────────────────────────────────────────────────
+function toggleSidebar(){
+  const sb=document.getElementById('sidebar');
+  const ov=document.getElementById('sb-overlay');
+  const open=sb.classList.toggle('open');
+  ov.classList.toggle('show',open);
+}
+function closeSidebar(){
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sb-overlay').classList.remove('show');
+}
+
+// ── Copy code ──────────────────────────────────────────────────────────────────
+function copyCode(btn){
+  const pre=btn.closest('.code-block').querySelector('pre');
+  if(!pre) return;
+  navigator.clipboard.writeText(pre.textContent.trim()).then(()=>{
+    btn.textContent='copied!'; btn.style.color='var(--gr)';
+    setTimeout(()=>{ btn.textContent='copy'; btn.style.color=''; },2000);
+  });
+}
+
+// ── Search ─────────────────────────────────────────────────────────────────────
+function searchDocs(q){
+  if(!q.trim()){ document.querySelectorAll('.sb-link').forEach(l=>l.style.display=''); return; }
+  const lq=q.toLowerCase();
+  document.querySelectorAll('.sb-link').forEach(l=>{
+    l.style.display=l.textContent.toLowerCase().includes(lq)?'':'none';
+  });
+}
+
+// ── Init ───────────────────────────────────────────────────────────────────────
+showPage('overview');
+
+// Handle hash
+if(location.hash){
+  const id=location.hash.slice(1);
+  if(pages[id]) showPage(id);
+}
+</script>
+</body>
+</html>

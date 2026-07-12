@@ -1,0 +1,1142 @@
+<!--
+Author: Aarav Shah
+Portfolio: aaravshah1311.is-great.net
+github: github.com/aaravshah1311
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Agent-2 — Autonomous AI Development Agent</title>
+<link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Tiempos+Text:ital,wght@0,400;0,500;1,400&family=IBM+Plex+Mono:wght@300;400;500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0a0a;
+  --bg1:#0f0f0f;
+  --bg2:#141414;
+  --bg3:#1a1a1a;
+  --bd:#252525;
+  --bd2:#303030;
+  --tx:#e8e8e8;
+  --tx2:#888;
+  --tx3:#444;
+  --wh:#ffffff;
+  --ac:#d4a853;   /* Claude's warm amber/gold accent */
+  --ac2:#c49642;
+  --pu:#7c6af7;
+  --gr:#3ddc84;
+  --rd:#ff5555;
+  --or:#f97316;
+  --cy:#60b8ff;
+  --mn:'IBM Plex Mono',monospace;
+  --serif:'Georgia','Times New Roman',serif;
+  --sans:'Inter',sans-serif;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--tx);font-family:var(--sans);overflow-x:hidden;cursor:none}
+a{text-decoration:none;color:inherit}
+button{font-family:inherit;cursor:none;border:none;background:none}
+::-webkit-scrollbar{width:3px}
+::-webkit-scrollbar-thumb{background:var(--bd2)}
+
+/* ── Custom cursor ─────────────────────────────────────── */
+#cur{position:fixed;width:8px;height:8px;background:var(--wh);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:width .2s,height .2s,background .2s;mix-blend-mode:difference}
+#cur-ring{position:fixed;width:32px;height:32px;border:1px solid rgba(255,255,255,.3);border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:all .18s ease}
+
+/* ── Canvas ────────────────────────────────────────────── */
+#bg-canvas{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.6}
+
+/* ── Grid overlay (Claude-like) ─────────────────────────── */
+.grid-overlay{
+  position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:
+    linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);
+  background-size:60px 60px;
+}
+
+/* ── Nav ────────────────────────────────────────────────── */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:200;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 40px;height:56px;
+  background:rgba(10,10,10,.92);
+  backdrop-filter:blur(24px);
+  border-bottom:1px solid var(--bd);
+}
+.logo{display:flex;align-items:center;gap:12px}
+.logo-3d{width:32px;height:32px;flex-shrink:0}
+.logo-name{
+  font-family:var(--serif);font-size:18px;font-style:italic;
+  color:var(--wh);letter-spacing:.01em;
+}
+.logo-name b{font-style:normal;font-weight:500;color:var(--ac)}
+.nav-links{display:flex;align-items:center;gap:28px}
+.nav-links a{font-size:13.5px;color:var(--tx2);transition:color .15s;letter-spacing:.01em}
+.nav-links a:hover{color:var(--wh)}
+.nav-cta{display:flex;align-items:center;gap:10px}
+.btn-nav-ghost{
+  font-size:13px;color:var(--tx2);padding:7px 16px;border-radius:6px;
+  border:1px solid var(--bd2);transition:all .2s;letter-spacing:.01em;
+}
+.btn-nav-ghost:hover{color:var(--wh);border-color:var(--tx3)}
+.btn-nav-solid{
+  font-size:13px;color:var(--bg);background:var(--wh);
+  padding:8px 18px;border-radius:6px;font-weight:500;transition:all .2s;
+}
+.btn-nav-solid:hover{background:rgba(255,255,255,.88);transform:translateY(-1px)}
+
+/* ── Sections ───────────────────────────────────────────── */
+section{position:relative;z-index:1}
+.wrap{max-width:1100px;margin:0 auto;padding:0 40px}
+
+/* ── Hero ───────────────────────────────────────────────── */
+#hero{
+  min-height:100vh;display:flex;align-items:center;
+  padding:80px 0;position:relative;overflow:hidden;
+}
+.hero-inner{
+  display:grid;grid-template-columns:1fr 1fr;gap:80px;
+  align-items:center;width:100%;
+}
+.hero-left{}
+.hero-eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  font-family:var(--mn);font-size:11px;color:var(--tx3);
+  letter-spacing:.12em;text-transform:uppercase;margin-bottom:28px;
+}
+.hero-eyebrow::before{content:'';width:20px;height:1px;background:var(--tx3)}
+.hero-title{
+  font-family:var(--serif);font-size:clamp(44px,5.5vw,72px);
+  color:var(--wh);line-height:1.1;letter-spacing:-.02em;margin-bottom:24px;
+}
+.hero-title em{font-style:italic;color:var(--ac)}
+.hero-sub{
+  font-size:16px;color:var(--tx2);line-height:1.75;
+  max-width:420px;margin-bottom:44px;
+}
+.hero-actions{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:52px}
+.btn-cta-pri{
+  display:inline-flex;align-items:center;gap:8px;
+  background:var(--wh);color:var(--bg);font-size:14px;font-weight:500;
+  padding:12px 24px;border-radius:8px;transition:all .2s;
+}
+.btn-cta-pri:hover{background:rgba(255,255,255,.88);transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.4)}
+.btn-cta-sec{
+  display:inline-flex;align-items:center;gap:8px;
+  border:1px solid var(--bd2);color:var(--tx);font-size:14px;
+  padding:12px 24px;border-radius:8px;transition:all .2s;
+}
+.btn-cta-sec:hover{border-color:var(--tx3);transform:translateY(-2px)}
+.hero-stats{display:flex;gap:36px;flex-wrap:wrap}
+.h-stat-n{
+  font-family:var(--serif);font-style:italic;font-size:32px;
+  color:var(--wh);
+}
+.h-stat-l{font-family:var(--mn);font-size:10px;color:var(--tx3);letter-spacing:.1em;text-transform:uppercase;margin-top:3px}
+
+/* hero right — 3D logo canvas */
+.hero-right{
+  display:flex;align-items:center;justify-content:center;
+  position:relative;height:460px;
+}
+#logo-canvas{width:100%;height:100%;border-radius:16px}
+.logo-glow{
+  position:absolute;inset:0;border-radius:16px;
+  background:radial-gradient(ellipse at center,rgba(124,106,247,.08) 0%,transparent 70%);
+  pointer-events:none;
+}
+
+/* ── Download strip ─────────────────────────────────────── */
+#download{
+  border-top:1px solid var(--bd);
+  border-bottom:1px solid var(--bd);
+  padding:52px 0;
+  background:rgba(15,15,15,.8);
+}
+.dl-inner{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:32px}
+.dl-left h2{font-family:var(--serif);font-size:30px;color:var(--wh);margin-bottom:8px}
+.dl-left p{font-size:14px;color:var(--tx2);line-height:1.65}
+.dl-cards{display:flex;gap:12px;flex-wrap:wrap}
+.dl-card{
+  display:flex;align-items:center;gap:12px;
+  background:var(--bg2);border:1px solid var(--bd);border-radius:10px;
+  padding:14px 20px;transition:all .25s;cursor:pointer;
+  /* Anti-gravity: starts at rest, floats on hover */
+  transform:translateY(0) scale(1);
+  box-shadow:0 2px 8px rgba(0,0,0,.3);
+}
+.dl-card:hover{
+  transform:translateY(-8px) scale(1.02);
+  border-color:var(--bd2);
+  box-shadow:0 24px 48px rgba(0,0,0,.5),0 0 0 1px rgba(255,255,255,.06);
+}
+.dl-card-icon{font-size:26px;flex-shrink:0}
+.dl-card-info{min-width:0}
+.dl-card-title{font-size:13.5px;color:var(--wh);font-weight:500}
+.dl-card-sub{font-family:var(--mn);font-size:10.5px;color:var(--tx3);margin-top:2px}
+.dl-card-arr{color:var(--tx3);font-size:16px;margin-left:8px;transition:transform .2s}
+.dl-card:hover .dl-card-arr{transform:translateX(4px)}
+
+/* install strip */
+.install-strip{
+  margin-top:32px;background:var(--bg2);border:1px solid var(--bd);
+  border-radius:10px;padding:18px 24px;
+  display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;
+}
+.install-cmd{
+  font-family:var(--mn);font-size:13px;color:var(--tx2);
+  display:flex;align-items:center;gap:12px;
+}
+.install-cmd span{color:var(--tx3)}
+.install-cmd code{color:var(--wh)}
+.copy-btn{
+  font-family:var(--mn);font-size:11px;color:var(--tx3);
+  border:1px solid var(--bd);padding:5px 12px;border-radius:5px;
+  transition:all .2s;
+}
+.copy-btn:hover{color:var(--wh);border-color:var(--tx3)}
+.install-steps{
+  display:flex;gap:24px;flex-wrap:wrap;
+  font-family:var(--mn);font-size:11.5px;color:var(--tx3);
+}
+.install-step{display:flex;align-items:center;gap:6px}
+.install-step .n{
+  width:18px;height:18px;border-radius:50%;border:1px solid var(--bd2);
+  display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--ac);
+  flex-shrink:0;
+}
+.install-step .t{color:var(--tx2)}
+
+/* ── Features (Claude-style editorial grid) ─────────────── */
+#features{padding:120px 0}
+.section-label{
+  font-family:var(--mn);font-size:10.5px;color:var(--tx3);
+  letter-spacing:.14em;text-transform:uppercase;
+  display:flex;align-items:center;gap:10px;margin-bottom:16px;
+}
+.section-label::before{content:'';width:16px;height:1px;background:var(--tx3)}
+.section-h{
+  font-family:var(--serif);font-size:clamp(32px,4vw,52px);
+  color:var(--wh);line-height:1.15;letter-spacing:-.02em;margin-bottom:14px;
+}
+.section-h em{font-style:italic;color:var(--ac)}
+.section-p{font-size:15px;color:var(--tx2);line-height:1.7;max-width:480px}
+
+.feat-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:1px;background:var(--bd);border:1px solid var(--bd);
+  border-radius:12px;overflow:hidden;margin-top:64px;
+}
+.feat-cell{
+  background:var(--bg1);padding:36px 32px;
+  position:relative;overflow:hidden;transition:background .2s;
+}
+.feat-cell::after{
+  content:'';position:absolute;bottom:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--bd),transparent);
+}
+.feat-cell:hover{background:var(--bg2)}
+
+/* anti-gravity float effect on feature icons */
+.feat-ico{
+  font-size:28px;margin-bottom:20px;display:block;
+  transition:transform .4s cubic-bezier(.34,1.56,.64,1),filter .3s;
+  filter:drop-shadow(0 0 0px transparent);
+}
+.feat-cell:hover .feat-ico{
+  transform:translateY(-10px) scale(1.15);
+  filter:drop-shadow(0 12px 16px rgba(0,0,0,.5));
+}
+.feat-n{font-size:16px;font-weight:500;color:var(--wh);margin-bottom:10px;letter-spacing:-.01em}
+.feat-d{font-size:13.5px;color:var(--tx2);line-height:1.65}
+.feat-tag{
+  display:inline-block;margin-top:14px;
+  font-family:var(--mn);font-size:9.5px;color:var(--tx3);
+  border:1px solid var(--bd);padding:3px 8px;border-radius:4px;letter-spacing:.06em;
+}
+
+/* ── How it works ───────────────────────────────────────── */
+#how{padding:120px 0;border-top:1px solid var(--bd)}
+.how-grid{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:start;margin-top:64px}
+.how-steps{display:flex;flex-direction:column;gap:32px}
+.how-step{
+  display:flex;gap:20px;padding:24px;border-radius:10px;
+  border:1px solid transparent;transition:all .25s;
+  /* anti-gravity on hover */
+  transform:translateY(0);
+}
+.how-step:hover{
+  border-color:var(--bd);background:var(--bg2);
+  transform:translateY(-4px);
+  box-shadow:0 12px 32px rgba(0,0,0,.3);
+}
+.how-step-n{
+  width:36px;height:36px;border-radius:8px;
+  background:var(--bg3);border:1px solid var(--bd);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--mn);font-size:12px;color:var(--tx3);flex-shrink:0;
+}
+.how-step-title{font-size:15px;font-weight:500;color:var(--wh);margin-bottom:6px}
+.how-step-desc{font-size:13.5px;color:var(--tx2);line-height:1.65}
+
+/* terminal demo */
+.how-demo{
+  background:var(--bg);border:1px solid var(--bd);border-radius:12px;
+  overflow:hidden;position:sticky;top:80px;
+  box-shadow:0 32px 64px rgba(0,0,0,.5);
+}
+.demo-bar{
+  display:flex;align-items:center;gap:6px;padding:12px 16px;
+  border-bottom:1px solid var(--bd);background:rgba(20,20,20,.8);
+}
+.demo-dot{width:10px;height:10px;border-radius:50%}
+.demo-title{font-family:var(--mn);font-size:10.5px;color:var(--tx3);margin-left:8px}
+.demo-body{padding:20px;font-family:var(--mn);font-size:12.5px;line-height:1.85;min-height:260px}
+.demo-line{margin-bottom:2px}
+.dm-prompt{color:var(--pu)}
+.dm-cmd{color:rgba(255,255,255,.7)}
+.dm-tool{color:var(--ac)}
+.dm-out{color:var(--tx2);padding-left:16px}
+.dm-gr{color:var(--gr);padding-left:16px}
+.dm-cy{color:var(--cy);padding-left:16px}
+.dm-rd{color:var(--rd);padding-left:16px}
+.dm-or{color:var(--or)}
+.cursor{display:inline-block;width:7px;height:13px;background:var(--wh);animation:blink .75s infinite;vertical-align:middle;border-radius:1px}
+@keyframes blink{0%,49%{opacity:1}50%,100%{opacity:0}}
+
+/* ── Modes & Models ─────────────────────────────────────── */
+#modes{padding:120px 0;border-top:1px solid var(--bd)}
+.modes-row{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:64px}
+.mode-card{
+  border:1px solid var(--bd);border-radius:10px;padding:28px 24px;
+  transition:all .3s cubic-bezier(.34,1.28,.64,1);
+  transform:translateY(0) scale(1);
+}
+/* anti-gravity */
+.mode-card:hover{
+  transform:translateY(-12px) scale(1.02);
+  border-color:var(--bd2);
+  box-shadow:0 32px 56px rgba(0,0,0,.45),0 0 0 1px rgba(255,255,255,.04);
+  background:var(--bg2);
+}
+.mode-ico{font-size:28px;margin-bottom:16px}
+.mode-n{font-size:18px;font-weight:500;color:var(--wh);margin-bottom:6px}
+.mode-tok{font-family:var(--mn);font-size:10.5px;color:var(--tx3);margin-bottom:12px}
+.mode-d{font-size:13.5px;color:var(--tx2);line-height:1.65}
+.mode-rec{
+  display:inline-block;margin-top:14px;
+  font-family:var(--mn);font-size:9.5px;color:var(--ac);
+  border:1px solid rgba(212,168,83,.3);padding:3px 10px;border-radius:4px;letter-spacing:.08em;
+}
+
+#models{padding:120px 0;border-top:1px solid var(--bd);background:rgba(15,15,15,.5)}
+.models-list{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:64px}
+.model-row{
+  display:flex;align-items:center;gap:14px;
+  padding:16px 18px;border:1px solid var(--bd);border-radius:8px;
+  transition:all .25s cubic-bezier(.34,1.4,.64,1);
+  transform:translateY(0);
+}
+.model-row:hover{
+  transform:translateY(-6px) scale(1.01);
+  border-color:var(--bd2);background:var(--bg2);
+  box-shadow:0 16px 32px rgba(0,0,0,.35);
+}
+.m-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.m-key{font-family:var(--mn);font-size:11.5px;color:var(--cy);flex:1}
+.m-label{font-size:12.5px;color:var(--tx2)}
+.m-group{
+  font-family:var(--mn);font-size:9px;color:var(--tx3);
+  border:1px solid var(--bd);padding:2px 7px;border-radius:3px;
+}
+
+/* ── Security ───────────────────────────────────────────── */
+#security{padding:120px 0;border-top:1px solid var(--bd)}
+.sec-layout{display:grid;grid-template-columns:1fr 1.1fr;gap:64px;align-items:start;margin-top:64px}
+.sec-tools{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:28px}
+.sec-tool{
+  font-family:var(--mn);font-size:11px;color:var(--tx2);
+  border:1px solid var(--bd);padding:6px 12px;border-radius:5px;
+  transition:all .25s cubic-bezier(.34,1.5,.64,1);
+  transform:translateY(0);
+}
+.sec-tool:hover{
+  transform:translateY(-6px) scale(1.08);
+  color:var(--rd);border-color:rgba(255,85,85,.4);
+  background:rgba(255,85,85,.06);
+  box-shadow:0 10px 24px rgba(0,0,0,.3);
+}
+.sec-terminal{
+  background:var(--bg);border:1px solid var(--bd);border-radius:12px;
+  overflow:hidden;box-shadow:0 24px 48px rgba(0,0,0,.4);
+}
+.sec-bar{
+  display:flex;align-items:center;gap:6px;padding:11px 16px;
+  border-bottom:1px solid var(--bd);
+}
+.sec-body{padding:18px 20px;font-family:var(--mn);font-size:12px;line-height:1.9}
+
+/* ── Pro ────────────────────────────────────────────────── */
+#pro{padding:120px 0;border-top:1px solid var(--bd)}
+.pro-block{
+  background:linear-gradient(135deg,rgba(249,115,22,.06),rgba(212,168,83,.04));
+  border:1px solid rgba(249,115,22,.18);border-radius:16px;
+  padding:64px;position:relative;overflow:hidden;margin-top:64px;
+  transition:all .3s;
+}
+.pro-block:hover{
+  border-color:rgba(249,115,22,.3);
+  box-shadow:0 32px 64px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.05);
+}
+.pro-bg-text{
+  position:absolute;right:-40px;top:-30px;
+  font-family:var(--serif);font-size:220px;font-weight:400;
+  color:rgba(249,115,22,.03);pointer-events:none;letter-spacing:-.04em;line-height:1;
+  font-style:italic;
+}
+.pro-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  font-family:var(--mn);font-size:10px;color:var(--or);
+  border:1px solid rgba(249,115,22,.3);padding:5px 14px;border-radius:16px;
+  letter-spacing:.1em;text-transform:uppercase;margin-bottom:24px;
+}
+.pro-h{font-family:var(--serif);font-size:clamp(36px,5vw,58px);color:var(--wh);letter-spacing:-.03em;margin-bottom:16px}
+.pro-h em{font-style:italic;color:var(--or)}
+.pro-p{font-size:15px;color:var(--tx2);line-height:1.7;max-width:500px;margin-bottom:36px}
+.pro-feats{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:36px}
+.pro-feat{
+  font-family:var(--mn);font-size:11px;color:var(--tx);
+  border:1px solid var(--bd);padding:6px 14px;border-radius:5px;
+  display:flex;align-items:center;gap:6px;
+  transition:all .2s cubic-bezier(.34,1.4,.64,1);
+}
+.pro-feat:hover{
+  transform:translateY(-5px);border-color:rgba(249,115,22,.4);
+  color:var(--or);background:rgba(249,115,22,.06);
+  box-shadow:0 8px 20px rgba(0,0,0,.3);
+}
+.pro-feat .dot{color:var(--or)}
+.pro-cta{
+  display:inline-flex;align-items:center;gap:10px;
+  background:linear-gradient(135deg,#b45309,var(--or));
+  color:#fff;font-size:14px;font-weight:500;
+  padding:13px 28px;border-radius:8px;
+  box-shadow:0 4px 20px rgba(249,115,22,.3);transition:all .2s;
+}
+.pro-cta:hover{transform:translateY(-3px);box-shadow:0 12px 36px rgba(249,115,22,.4)}
+
+/* ── Compare ────────────────────────────────────────────── */
+#compare{padding:120px 0;border-top:1px solid var(--bd)}
+table.cmp{width:100%;border-collapse:collapse;margin-top:64px;font-size:13.5px}
+table.cmp th{
+  padding:14px 18px;text-align:left;
+  font-family:var(--mn);font-size:10px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--tx3);border-bottom:1px solid var(--bd);font-weight:400;
+}
+table.cmp th:nth-child(2){text-align:center;color:var(--tx2)}
+table.cmp th:nth-child(3){text-align:center;color:var(--or)}
+table.cmp td{padding:13px 18px;border-bottom:1px solid rgba(37,37,37,.6);color:var(--tx2)}
+table.cmp td:nth-child(2),table.cmp td:nth-child(3){text-align:center;font-size:16px}
+table.cmp tr:hover td{background:rgba(255,255,255,.02)}
+table.cmp .y{color:var(--gr)}.cmp .n{color:var(--tx3)}.cmp .yo{color:var(--or)}
+table.cmp .cat td{
+  background:rgba(20,20,20,.8);font-family:var(--mn);font-size:9.5px;
+  letter-spacing:.12em;text-transform:uppercase;color:var(--tx3);padding:9px 18px;
+}
+
+/* ── CTA ────────────────────────────────────────────────── */
+#cta{padding:160px 0;text-align:center;border-top:1px solid var(--bd);position:relative;overflow:hidden}
+#cta::before{
+  content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  width:700px;height:500px;border-radius:50%;
+  background:radial-gradient(ellipse,rgba(212,168,83,.05) 0%,transparent 70%);
+  pointer-events:none;
+}
+.cta-h{font-family:var(--serif);font-size:clamp(40px,6vw,76px);color:var(--wh);letter-spacing:-.03em;margin-bottom:20px}
+.cta-h em{font-style:italic;color:var(--ac)}
+.cta-p{font-size:16px;color:var(--tx2);line-height:1.7;margin-bottom:48px}
+.cta-row{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+
+/* ── Footer ─────────────────────────────────────────────── */
+footer{
+  border-top:2px solid var(--bd);padding:36px 40px;
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:20px;
+}
+.footer-logo{font-family:var(--serif);font-style:italic;font-size:16px;color:var(--tx3)}
+.footer-logo b{font-style:normal;color:var(--ac)}
+.footer-links{display:flex;gap:20px}
+.footer-links a{font-family:var(--mn);font-size:11px;color:var(--tx3);transition:color .15s}
+.footer-links a:hover{color:var(--wh)}
+.footer-copy{font-family:var(--mn);font-size:11px;color:var(--tx3)}
+
+/* ── Reveal ─────────────────────────────────────────────── */
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .7s ease,transform .7s ease}
+.reveal.visible{opacity:1;transform:translateY(0)}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.fa1{animation:fadeUp .8s ease .1s both}
+.fa2{animation:fadeUp .8s ease .25s both}
+.fa3{animation:fadeUp .8s ease .4s both}
+.fa4{animation:fadeUp .8s ease .55s both}
+.fa5{animation:fadeUp .8s ease .7s both}
+
+/* ── Responsive ─────────────────────────────────────────── */
+@media(max-width:900px){
+  nav{padding:0 20px}
+  .nav-links{display:none}
+  .wrap{padding:0 20px}
+  .hero-inner{grid-template-columns:1fr;gap:40px}
+  .hero-right{height:280px}
+  .how-grid{grid-template-columns:1fr}
+  .feat-grid{grid-template-columns:1fr 1fr}
+  .modes-row{grid-template-columns:1fr}
+  .models-list{grid-template-columns:1fr 1fr}
+  .sec-layout{grid-template-columns:1fr}
+  footer{flex-direction:column;align-items:flex-start}
+}
+@media(max-width:600px){
+  .feat-grid{grid-template-columns:1fr}
+  .models-list{grid-template-columns:1fr}
+  .hero-stats{gap:20px}
+  .pro-block{padding:36px 24px}
+}
+</style>
+</head>
+<body>
+
+<div id="cur"></div>
+<div id="cur-ring"></div>
+<canvas id="bg-canvas"></canvas>
+<div class="grid-overlay"></div>
+
+<!-- NAV -->
+<nav id="navbar">
+  <a href="#" class="logo">
+    <canvas id="logo-nav" class="logo-3d"></canvas>
+    <span class="logo-name"><b>Agent-2</b></span>
+  </a>
+  <div class="nav-links">
+    <a href="#features">Features</a>
+    <a href="#download">Install</a>
+    <a href="#how">How it works</a>
+    <a href="#models">Models</a>
+    <a href="#security">Security</a>
+    <a href="#pro">Pro</a>
+     <a href="/DOCS">Documentation</a>
+  </div>
+  <div class="nav-cta">
+    <a href="https://github.com/aaravshah1311/Agent-2-Beta" target="_blank" class="btn-nav-ghost">GitHub</a>
+    <a href="https://github.com/aaravshah1311/Agent-2-Beta/archive/refs/heads/main.zip" class="btn-nav-solid">Download</a>
+    <a href="/DOCS" class="btn-nav-solid">Documentation</a>
+</div>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="wrap">
+    <div class="hero-inner">
+      <div class="hero-left">
+        <div class="hero-eyebrow fa1">Open Source · Free · Self-hosted</div>
+        <h1 class="hero-title fa2">
+          Build anything.<br><em>Break anything.</em><br>Remember everything.
+        </h1>
+        <p class="hero-sub fa3">
+          A self-hosted autonomous AI agent powered by Google Gemini — coding assistant, terminal agent, security tester, and persistent memory in one interface.
+        </p>
+        <div class="hero-actions fa4">
+          <a href="#download" class="btn-cta-pri">
+            ⬇ Download Agent-2
+          </a>
+          <a href="#pro" class="btn-cta-sec">
+            🔴 View Pro Version
+          </a>
+        </div>
+        <div class="hero-stats fa5">
+          <div><div class="h-stat-n">12</div><div class="h-stat-l">Agent Tools</div></div>
+          <div><div class="h-stat-n">4</div><div class="h-stat-l">Gemini Models</div></div>
+          <div><div class="h-stat-n">∞</div><div class="h-stat-l">Custom Providers</div></div>
+          <div><div class="h-stat-n">∞</div><div class="h-stat-l">Memory</div></div>
+        </div>
+      </div>
+      <div class="hero-right fa3">
+        <canvas id="logo-canvas"></canvas>
+        <div class="logo-glow"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DOWNLOAD -->
+<section id="download">
+  <div class="wrap">
+    <div class="dl-inner">
+      <div class="dl-left">
+        <h2>Get Agent-2</h2>
+        <p>One command to install, one command to run.<br>Works on Windows, macOS, and Linux.</p>
+      </div>
+      <div>
+        <div class="dl-cards">
+          <a href="https://github.com/aaravshah1311/Agent-2-Beta" target="_blank" class="dl-card">
+            <div class="dl-card-icon">🪟</div>
+            <div class="dl-card-info">
+              <div class="dl-card-title">Windows</div>
+              <div class="dl-card-sub">CMD / PowerShell</div>
+            </div>
+            <div class="dl-card-arr">→</div>
+          </a>
+          <a href="https://github.com/aaravshah1311/Agent-2-Beta" target="_blank" class="dl-card">
+            <div class="dl-card-icon">🍎</div>
+            <div class="dl-card-info">
+              <div class="dl-card-title">macOS</div>
+              <div class="dl-card-sub">zsh · arm64 / x64</div>
+            </div>
+            <div class="dl-card-arr">→</div>
+          </a>
+          <a href="https://github.com/aaravshah1311/Agent-2-Beta" target="_blank" class="dl-card">
+            <div class="dl-card-icon">🐧</div>
+            <div class="dl-card-info">
+              <div class="dl-card-title">Linux</div>
+              <div class="dl-card-sub">bash · apt / dnf / pacman</div>
+            </div>
+            <div class="dl-card-arr">→</div>
+          </a>
+          <a href="https://github.com/aaravshah1311/Agent-2-Beta" target="_blank" class="dl-card" style="border-color:rgba(61,220,132,.2)">
+            <div class="dl-card-icon">⚡</div>
+            <div class="dl-card-info">
+              <div class="dl-card-title" style="color:var(--gr)">CLI Agent</div>
+              <div class="dl-card-sub">agent2cli.py</div>
+            </div>
+            <div class="dl-card-arr">→</div>
+          </a>
+        </div>
+        <div class="install-strip" style="border-color:rgba(61,220,132,.25)">
+          <div class="install-cmd">
+            <span>$</span>
+            <code id="install-oneline">curl -fsSL https://raw.githubusercontent.com/aaravshah1311/Agent-2-Beta/main/install.py | python3 -</code>
+          </div>
+          <button class="copy-btn" onclick="copyText('install-oneline',this)">copy</button>
+        </div>
+        <div style="font-family:var(--mn);font-size:10.5px;color:var(--tx3);margin:10px 0 4px">or clone manually</div>
+        <div class="install-strip">
+          <div class="install-cmd">
+            <span>$</span>
+            <code id="install-clone">git clone https://github.com/aaravshah1311/Agent-2-Beta.git</code>
+          </div>
+          <button class="copy-btn" onclick="copyText('install-clone',this)">copy</button>
+        </div>
+        <div class="install-strip">
+          <div class="install-cmd">
+            <span>$</span>
+            <code id="install-run">cd Agent-2-Beta &amp;&amp; python run.py</code>
+          </div>
+          <button class="copy-btn" onclick="copyText('install-run',this)">copy</button>
+        </div>
+        <div class="install-steps" style="margin-top:16px">
+          <div class="install-step"><div class="n">1</div><span class="t">One-line install</span></div>
+          <div class="install-step"><div class="n">2</div><span class="t">.venv + deps auto-setup</span></div>
+          <div class="install-step"><div class="n">3</div><span class="t">Paste Gemini key</span></div>
+          <div class="install-step"><div class="n">4</div><span class="t">localhost:1311</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features">
+  <div class="wrap">
+    <div class="section-label reveal">Core capabilities</div>
+    <h2 class="section-h reveal">Everything you need.<br><em>Nothing you don't.</em></h2>
+    <p class="section-p reveal">Agent-2 combines the tools a developer and security researcher actually use — with a persistent memory engine that gets smarter every session.</p>
+    <div class="feat-grid reveal">
+      <div class="feat-cell"><span class="feat-ico">🗂️</span><div class="feat-n">Workspaces</div><div class="feat-d">Claude Projects-style context. Every chat belongs to a workspace. The agent knows your path, framework, and history.</div><span class="feat-tag">workspace-scoped memory</span></div>
+      <div class="feat-cell"><span class="feat-ico">🤖</span><div class="feat-n">12 Agentic Tools</div><div class="feat-d">run_command · read_file · write_file · multi_edit_files · list_dir · grep_search · delete_file · scan_project · web_search · update_todo · save_memory · emit_plan.</div><span class="feat-tag">autonomous selection</span></div>
+      <div class="feat-cell"><span class="feat-ico">🧠</span><div class="feat-n">Persistent Memory</div><div class="feat-d">Auto-extracts facts from every conversation. Global, workspace-scoped, importance-scored. Gets smarter over time.</div><span class="feat-tag">background extraction</span></div>
+      <div class="feat-cell"><span class="feat-ico">💻</span><div class="feat-n">Multi-tab Terminals</div><div class="feat-d">Real xterm.js terminals. Live streaming, stdin injection, ↑↓ command history, 2-stage kill (SIGTERM→SIGKILL).</div><span class="feat-tag">subprocess streaming</span></div>
+      <div class="feat-cell"><span class="feat-ico">🔑</span><div class="feat-n">Key Rotation</div><div class="feat-d">Up to 9 Gemini keys. Auto-rotate on quota. Pin a key. Real-time token tracking per key. Zero downtime.</div><span class="feat-tag">automatic failover</span></div>
+      <div class="feat-cell"><span class="feat-ico">🔌</span><div class="feat-n">Custom Providers</div><div class="feat-d">Bring your own API. Any OpenAI- or Anthropic-compatible endpoint — base URL, key, model id — becomes a selectable model.</div><span class="feat-tag">openai · anthropic</span></div>
+      <div class="feat-cell"><span class="feat-ico">🕷️</span><div class="feat-n">Burp Suite MCP</div><div class="feat-d">Connect to Burp's MCP server and hand every Burp tool — Proxy, Repeater, Intruder, Scanner — straight to the agent.</div><span class="feat-tag">live pentesting bridge</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how">
+  <div class="wrap">
+    <div class="section-label reveal">How it thinks</div>
+    <h2 class="section-h reveal">A deliberate agent loop</h2>
+    <div class="how-grid">
+      <div class="how-steps reveal">
+        <div class="how-step"><div class="how-step-n">01</div><div><div class="how-step-title">Understand context</div><div class="how-step-desc">Reads your message, loads workspace memories, checks active workspace path and framework.</div></div></div>
+        <div class="how-step"><div class="how-step-n">02</div><div><div class="how-step-title">Emit a plan</div><div class="how-step-desc">For complex tasks, shows a step-by-step plan before acting so you always know what's coming next.</div></div></div>
+        <div class="how-step"><div class="how-step-n">03</div><div><div class="how-step-title">Execute with real tools</div><div class="how-step-desc">Commands run in your actual shell. File writes happen on your real filesystem. Results stream live.</div></div></div>
+        <div class="how-step"><div class="how-step-n">04</div><div><div class="how-step-title">Self-correct</div><div class="how-step-desc">If a command fails, the agent reads the error, diagnoses it, and retries — up to 10 iterations.</div></div></div>
+        <div class="how-step"><div class="how-step-n">05</div><div><div class="how-step-title">Learn and remember</div><div class="how-step-desc">After responding, auto-extracts facts to memory so every next session is smarter.</div></div></div>
+      </div>
+      <div class="how-demo reveal">
+        <div class="demo-bar">
+          <div class="demo-dot" style="background:#ff5555"></div>
+          <div class="demo-dot" style="background:#f0c060;margin-left:4px"></div>
+          <div class="demo-dot" style="background:#3ddc84;margin-left:4px"></div>
+          <span class="demo-title">Agent2 · terminal t1</span>
+        </div>
+        <div class="demo-body" id="demo-body">
+          <div class="demo-line"><span class="dm-prompt">you &gt;</span> <span class="dm-cmd" id="demo-cmd"></span><span class="cursor" id="demo-cur"></span></div>
+          <div id="demo-out"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MODES -->
+<section id="modes">
+  <div class="wrap">
+    <div class="section-label reveal">Reasoning modes</div>
+    <h2 class="section-h reveal">Pick your <em>speed</em></h2>
+    <div class="modes-row reveal">
+      <div class="mode-card"><div class="mode-ico">⚡</div><div class="mode-n">Fast</div><div class="mode-tok">2,048 tokens</div><div class="mode-d">Quick answers, simple commands. Lowest API cost — ideal for rapid iteration.</div></div>
+      <div class="mode-card" style="border-color:rgba(212,168,83,.2);background:rgba(212,168,83,.03)">
+        <div class="mode-ico">★</div><div class="mode-n">Pro</div><div class="mode-tok">8,192 tokens</div>
+        <div class="mode-d">Balanced speed and quality. Recommended for most tasks — code, debugging, security.</div>
+        <div class="mode-rec">RECOMMENDED</div>
+      </div>
+      <div class="mode-card"><div class="mode-ico">🧠</div><div class="mode-n">Thinking</div><div class="mode-tok">16,384 + thinking budget</div><div class="mode-d">Extended reasoning. Best for hard architecture, complex algorithms. Gemini 2.5 / 3.1 only.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- MODELS -->
+<section id="models">
+  <div class="wrap">
+    <div class="section-label reveal">Model selection</div>
+    <h2 class="section-h reveal">Four Gemini models.<br><em>One switch.</em></h2>
+    <div class="models-list reveal">
+      <div class="model-row"><div class="m-dot" style="background:var(--gr);box-shadow:0 0 6px var(--gr)"></div><div class="m-key">2.5-flash</div><div class="m-label">Flash · default</div><div class="m-group">2.5</div></div>
+      <div class="model-row"><div class="m-dot" style="background:var(--gr);box-shadow:0 0 6px var(--gr)"></div><div class="m-key">2.5-pro</div><div class="m-label">Pro</div><div class="m-group">2.5</div></div>
+      <div class="model-row"><div class="m-dot" style="background:var(--pu);box-shadow:0 0 6px var(--pu)"></div><div class="m-key">3.1-flash</div><div class="m-label">Flash</div><div class="m-group">3.1</div></div>
+      <div class="model-row"><div class="m-dot" style="background:var(--pu);box-shadow:0 0 6px var(--pu)"></div><div class="m-key">3.1-pro</div><div class="m-label">Pro</div><div class="m-group">3.1</div></div>
+    </div>
+    <p class="section-p reveal" style="margin-top:28px">Plus <strong style="color:var(--tx)">bring-your-own</strong> — register any OpenAI- or Anthropic-compatible endpoint as a custom provider and it joins the same dropdown.</p>
+  </div>
+</section>
+
+<!-- SECURITY -->
+<section id="security">
+  <div class="wrap">
+    <div class="section-label reveal">Security research</div>
+    <h2 class="section-h reveal">Built for <em>offensive</em> security work</h2>
+    <div class="sec-layout">
+      <div class="reveal">
+        <p style="font-size:15px;color:var(--tx2);line-height:1.7;margin-bottom:28px">Agent-2 doesn't just suggest commands — it runs them, reads every output line, adapts strategy, and keeps going until the job is done.</p>
+        <div class="sec-tools">
+          <div class="sec-tool">nmap</div><div class="sec-tool">nikto</div><div class="sec-tool">gobuster</div>
+          <div class="sec-tool">sqlmap</div><div class="sec-tool">hydra</div><div class="sec-tool">ffuf</div>
+          <div class="sec-tool">metasploit</div><div class="sec-tool">searchsploit</div>
+          <div class="sec-tool">theharvester</div><div class="sec-tool">binwalk</div>
+          <div class="sec-tool">volatility</div><div class="sec-tool">netcat</div>
+          <div class="sec-tool">wireshark</div><div class="sec-tool">hashcat</div><div class="sec-tool">john</div>
+        </div>
+        <div style="font-family:var(--mn);font-size:12px;color:var(--tx3);line-height:2.1">
+          <div>● Full kill-chain: recon → enum → exploit → report</div>
+          <div>● Adapts to every output — reads errors and retries</div>
+          <div>● CVE lookup and exploit-db integration via web_search</div>
+          <div>● Autonomous vulnerability scanning, logic flaw detection (XSS/SQLi)</div>
+          <div>● Purpose-built for CTF and penetration testing work</div>
+        </div>
+      </div>
+      <div class="sec-terminal reveal">
+        <div class="sec-bar">
+          <div class="demo-dot" style="background:#ff5555"></div>
+          <div class="demo-dot" style="background:#f0c060;margin-left:4px"></div>
+          <div class="demo-dot" style="background:#3ddc84;margin-left:4px"></div>
+          <span style="font-family:var(--mn);font-size:10.5px;color:var(--rd);margin-left:10px">🔴 Security Session</span>
+        </div>
+        <div class="sec-body">
+          <div style="color:var(--pu);margin-bottom:6px">you &gt; pentest 10.10.14.5</div>
+          <div style="color:var(--or)">📋 Plan: Full pentest — 10 stages</div>
+          <div style="color:var(--tx3);margin:6px 0">────────────────────────</div>
+          <div style="color:var(--tx2)">⚙️  Stage 1: Host discovery</div>
+          <div style="color:var(--tx3);padding-left:14px">$ nmap -sn 10.10.14.5</div>
+          <div style="color:var(--gr);padding-left:14px">✓ Host is up (12ms)</div>
+          <div style="color:var(--tx2);margin-top:6px">⚙️  Stage 2: Full port scan</div>
+          <div style="color:var(--cy);padding-left:14px">22/tcp  OpenSSH 8.2p1</div>
+          <div style="color:var(--cy);padding-left:14px">80/tcp  Apache 2.4.41</div>
+          <div style="color:var(--cy);padding-left:14px">8080/tcp  Tomcat 9.0.31</div>
+          <div style="color:var(--tx2);margin-top:6px">🌐 web_search  CVE Tomcat 9.0.31</div>
+          <div style="color:var(--rd);padding-left:14px">⚠ CVE-2020-1938  CVSS 9.8</div>
+          <div style="color:var(--rd);padding-left:14px">   Ghostcat AJP RCE — exploit available</div>
+          <div style="color:var(--or);margin-top:6px">→ Launching msf exploit/tomcat_ghostcat…</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRO -->
+<section id="pro">
+  <div class="wrap">
+    <div class="pro-block reveal">
+      <div class="pro-bg-text">Pro</div>
+      <div class="pro-badge">🔴 Premium Edition</div>
+      <h2 class="pro-h">Meet <em>Agent-2-Pro</em></h2>
+      <p class="pro-p">A proper Software Engineer and Brutal Pentester. Build complete production projects from a single prompt. Run full kill-chain penetration tests end-to-end.</p>
+      <div class="pro-feats">
+        <div class="pro-feat"><span class="dot">✦</span> Software Engineering Mode</div>
+        <div class="pro-feat"><span class="dot">✦</span> DeepDive Task Decomposition</div>
+        <div class="pro-feat"><span class="dot">✦</span> Brutal Pentester</div>
+        <div class="pro-feat"><span class="dot">✦</span> QA & Test Generation</div>
+        <div class="pro-feat"><span class="dot">✦</span> Project Space</div>
+        <div class="pro-feat"><span class="dot">✦</span> Self-correction Loop</div>
+        <div class="pro-feat"><span class="dot">✦</span> Pentest Report Generation</div>
+        <div class="pro-feat"><span class="dot">✦</span> Git & Docker Ops</div>
+      </div>
+      <a href="mailto:aaravprogrammers@gmail.com" class="pro-cta">🔴 Request Access — aaravprogrammers@gmail.com</a>
+    </div>
+  </div>
+</section>
+
+<!-- COMPARE -->
+<section id="compare">
+  <div class="wrap">
+    <div class="section-label reveal">Comparison</div>
+    <h2 class="section-h reveal">Beta vs <em>Pro</em></h2>
+    <table class="cmp reveal">
+      <thead><tr><th>Feature</th><th>Beta · Free</th><th>Pro · Premium</th></tr></thead>
+      <tbody>
+        <tr class="cat"><td colspan="3">Core</td></tr>
+        <tr><td>Workspaces & multi-tab terminals</td><td class="y">✓</td><td class="yo">✓</td></tr>
+        <tr><td>12 agentic tools</td><td class="y">✓</td><td class="yo">✓ + Extended</td></tr>
+        <tr><td>Persistent memory</td><td class="y">✓</td><td class="yo">✓ Advanced</td></tr>
+        <tr><td>API key rotation (9 keys)</td><td class="y">✓</td><td class="yo">✓</td></tr>
+        <tr><td>Custom providers + Burp Suite MCP</td><td class="y">✓</td><td class="yo">✓</td></tr>
+        <tr><td>4 Gemini models + 3 modes</td><td class="y">✓</td><td class="yo">✓</td></tr>
+        <tr class="cat"><td colspan="3">Engineering</td></tr>
+        <tr><td>Software Engineering Mode</td><td class="n">—</td><td class="yo">✓</td></tr>
+        <tr><td>Full project from single prompt</td><td class="n">—</td><td class="yo">✓</td></tr>
+        <tr><td>Self-correction loop</td><td class="n">—</td><td class="yo">✓</td></tr>
+        <tr><td>QA & test generation</td><td class="n">—</td><td class="yo">✓</td></tr>
+        <tr><td>Git & Docker operations</td><td class="n">—</td><td class="yo">✓</td></tr>
+        <tr class="cat"><td colspan="3">Security</td></tr>
+        <tr><td>Basic security testing</td><td class="y">✓</td><td class="yo">✓</td></tr>
+        <tr><td>Full kill-chain pentesting</td><td class="n">—</td><td class="yo">✓</td></tr>
+        <tr><td>Auto pentest report</td><td class="n">—</td><td class="yo">✓</td></tr>
+        <tr><td>DeepDive task decomposition</td><td class="n">—</td><td class="yo">✓</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- CTA -->
+<section id="cta">
+  <div class="wrap">
+    <h2 class="cta-h reveal">Ready to build<br><em>anything?</em></h2>
+    <p class="cta-p reveal">Agent-2-Beta is free, open source, and installs in under 2 minutes.</p>
+    <div class="cta-row reveal">
+      <a href="https://github.com/aaravshah1311/Agent-2-Beta" target="_blank" class="btn-cta-pri">⭐ Star on GitHub</a>
+      <a href="mailto:aaravprogrammers@gmail.com" class="btn-cta-sec" style="border-color:rgba(249,115,22,.3);color:var(--or)">🔴 Get Agent-2-Pro</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo"><i>Agent-<b>2</b></i> · Built by Aarav Shah, Rudra Marathe &amp; Naitik Soni</div>
+  <div class="footer-links">
+    <a href="https://github.com/aaravshah1311/Agent-2-Beta" target="_blank">GitHub</a>
+    <a href="https://aaravshah1311.is-great.net" target="_blank">Portfolio</a>
+    <a href="mailto:aaravprogrammers@gmail.com">Contact</a>
+    <a href="mailto:aaravprogrammers@gmail.com">Get Pro</a>
+  </div>
+  <div class="footer-copy">© 2026 Agent-2 · MIT License (Beta)</div>
+</footer>
+
+<script>
+// ══════════ CURSOR ══════════
+const cur=document.getElementById('cur'), curR=document.getElementById('cur-ring');
+document.addEventListener('mousemove',e=>{
+  cur.style.left=e.clientX+'px'; cur.style.top=e.clientY+'px';
+  curR.style.left=e.clientX+'px'; curR.style.top=e.clientY+'px';
+});
+document.querySelectorAll('a,button,.feat-cell,.mode-card,.model-row,.sec-tool,.dl-card,.how-step,.pro-feat').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{ curR.style.width='48px';curR.style.height='48px';curR.style.borderColor='rgba(255,255,255,.5)'; });
+  el.addEventListener('mouseleave',()=>{ curR.style.width='32px';curR.style.height='32px';curR.style.borderColor='rgba(255,255,255,.3)'; });
+});
+
+// ══════════ 3D LOGO (hexagonal node network — like image 1) ══════════
+function buildLogo(canvas, small=false){
+  const W=canvas.offsetWidth||canvas.width, H=canvas.offsetHeight||canvas.height;
+  canvas.width=W; canvas.height=H;
+  const renderer=new THREE.WebGLRenderer({canvas,alpha:true,antialias:true});
+  renderer.setSize(W,H); renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+  renderer.setClearColor(0,0);
+
+  const scene=new THREE.Scene();
+  const camera=new THREE.PerspectiveCamera(45,W/H,0.1,100);
+  camera.position.set(0,0,small?3.5:5);
+
+  const scale=small?.55:1;
+  const r=1.6*scale;  // outer hex radius
+  const ri=0.8*scale; // inner circle radius
+
+  // ── Hexagonal outer vertices ────────────────────────────────────────────
+  const hexVerts=[];
+  for(let i=0;i<6;i++){
+    const angle=Math.PI/6+i*Math.PI/3;
+    hexVerts.push(new THREE.Vector3(Math.cos(angle)*r,Math.sin(angle)*r,0));
+  }
+
+  // ── Cyan outer node dots ────────────────────────────────────────────────
+  const nodeMat=new THREE.MeshBasicMaterial({color:0x00d0ff});
+  hexVerts.forEach(v=>{
+    const m=new THREE.Mesh(new THREE.SphereGeometry(0.045*scale,12,12),nodeMat);
+    m.position.copy(v); scene.add(m);
+  });
+
+  // ── Hexagon edge lines ──────────────────────────────────────────────────
+  const lineMat=new THREE.LineBasicMaterial({color:0x4488cc,transparent:true,opacity:.7});
+  const hexPts=[...hexVerts, hexVerts[0]];
+  scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(hexPts),lineMat));
+
+  // ── Inner circle (orbit ring) ────────────────────────────────────────────
+  const circlePts=[];
+  for(let i=0;i<=64;i++) circlePts.push(new THREE.Vector3(Math.cos(i/64*Math.PI*2)*ri,Math.sin(i/64*Math.PI*2)*ri,0));
+  scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(circlePts),
+    new THREE.LineBasicMaterial({color:0x3366aa,transparent:true,opacity:.45})));
+
+  // ── Spokes: each hex vertex to center ──────────────────────────────────
+  const spokeMat=new THREE.LineBasicMaterial({color:0x3366aa,transparent:true,opacity:.35});
+  hexVerts.forEach(v=>{
+    scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([v,new THREE.Vector3(0,0,0)]),spokeMat));
+  });
+
+  // ── Centre sphere (large blue dot) ─────────────────────────────────────
+  const centreMat=new THREE.MeshBasicMaterial({color:0x4a90e8});
+  const centre=new THREE.Mesh(new THREE.SphereGeometry(0.22*scale,24,24),centreMat);
+  scene.add(centre);
+
+  // ── Centre glow ring ───────────────────────────────────────────────────
+  const glowPts=[];
+  for(let i=0;i<=48;i++) glowPts.push(new THREE.Vector3(Math.cos(i/48*Math.PI*2)*.28*scale,Math.sin(i/48*Math.PI*2)*.28*scale,0));
+  scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(glowPts),
+    new THREE.LineBasicMaterial({color:0x5599ff,transparent:true,opacity:.5})));
+
+  // ── Second orbit ring (tilted) ─────────────────────────────────────────
+  const r2=1.2*scale, orbitPts=[];
+  for(let i=0;i<=64;i++) orbitPts.push(new THREE.Vector3(Math.cos(i/64*Math.PI*2)*r2,Math.sin(i/64*Math.PI*2)*r2,0));
+  const orbit2=new THREE.Line(new THREE.BufferGeometry().setFromPoints(orbitPts),
+    new THREE.LineBasicMaterial({color:0x336699,transparent:true,opacity:.3}));
+  orbit2.rotation.x=0.4; orbit2.rotation.z=0.2; scene.add(orbit2);
+
+  // ── Vertex "connections" (hex to inner circle points) ─────────────────
+  const connMat=new THREE.LineBasicMaterial({color:0x2244aa,transparent:true,opacity:.2});
+  hexVerts.forEach(v=>{
+    const angle=Math.atan2(v.y,v.x);
+    const inner=new THREE.Vector3(Math.cos(angle)*ri,Math.sin(angle)*ri,0);
+    scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([v,inner]),connMat));
+  });
+
+  // ── Mouse interaction ─────────────────────────────────────────────────
+  let targetRX=0,targetRY=0,currRX=0,currRY=0;
+  const parent=canvas.parentElement;
+  if(parent){
+    parent.addEventListener('mousemove',e=>{
+      const rect=parent.getBoundingClientRect();
+      targetRY=(e.clientX-rect.left-rect.width/2)/rect.width*0.6;
+      targetRX=-(e.clientY-rect.top-rect.height/2)/rect.height*0.4;
+    });
+    parent.addEventListener('mouseleave',()=>{ targetRX=0; targetRY=0; });
+  }
+
+  const group=new THREE.Group();
+  scene.children.forEach(c=>group.add(c));
+  // workaround: add all directly to scene, rotate scene's children via group
+  group.position.set(0,0,0); scene.add(group);
+
+  let t=0;
+  function animate(){
+    requestAnimationFrame(animate); t+=0.008;
+    currRX+=(targetRX-currRX)*.06;
+    currRY+=(targetRY-currRY)*.06;
+    group.rotation.y=currRY+t*0.3;
+    group.rotation.x=currRX+Math.sin(t*0.4)*0.1;
+    orbit2.rotation.x=0.4+t*0.2;
+    orbit2.rotation.z=0.2+t*0.15;
+    renderer.render(scene,camera);
+  }
+  animate();
+
+  new ResizeObserver(()=>{
+    const W2=canvas.offsetWidth, H2=canvas.offsetHeight;
+    if(!W2||!H2) return;
+    renderer.setSize(W2,H2);
+    camera.aspect=W2/H2;
+    camera.updateProjectionMatrix();
+  }).observe(canvas);
+}
+
+// Large hero logo
+window.addEventListener('DOMContentLoaded',()=>{
+  const heroC=document.getElementById('logo-canvas');
+  if(heroC){
+    heroC.style.width='100%'; heroC.style.height='100%';
+    setTimeout(()=>buildLogo(heroC,false),100);
+  }
+  // Small nav logo
+  const navC=document.getElementById('logo-nav');
+  if(navC){ navC.width=32; navC.height=32; buildLogo(navC,true); }
+});
+
+// ══════════ THREE.JS BACKGROUND ══════════
+(function(){
+  const canvas=document.getElementById('bg-canvas');
+  const renderer=new THREE.WebGLRenderer({canvas,alpha:true,antialias:true});
+  renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+  renderer.setClearColor(0,0);
+  const scene=new THREE.Scene();
+  const camera=new THREE.PerspectiveCamera(65,innerWidth/innerHeight,0.1,2000);
+  camera.position.z=60;
+
+  function resize(){renderer.setSize(innerWidth,innerHeight);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();}
+  resize(); window.addEventListener('resize',resize);
+
+  const N=200, pos=new Float32Array(N*3), vel=[], col=new Float32Array(N*3);
+  const pal=[[.49,.42,.97],[.38,.72,1],[.13,.53,.33],[.95,.45,.1]];
+  for(let i=0;i<N;i++){
+    pos[i*3]=(Math.random()-.5)*180; pos[i*3+1]=(Math.random()-.5)*130; pos[i*3+2]=(Math.random()-.5)*70;
+    vel.push({x:(Math.random()-.5)*.02,y:(Math.random()-.5)*.02,z:(Math.random()-.5)*.01});
+    const c=pal[i%pal.length]; col[i*3]=c[0];col[i*3+1]=c[1];col[i*3+2]=c[2];
+  }
+  const ptG=new THREE.BufferGeometry();
+  ptG.setAttribute('position',new THREE.BufferAttribute(pos,3));
+  ptG.setAttribute('color',new THREE.BufferAttribute(col,3));
+  scene.add(new THREE.Points(ptG,new THREE.PointsMaterial({size:.45,vertexColors:true,transparent:true,opacity:.3,sizeAttenuation:true})));
+
+  // sparse lines
+  for(let i=0;i<40;i++){
+    const a=Math.floor(Math.random()*N)*3, b=Math.floor(Math.random()*N)*3;
+    scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([
+      new THREE.Vector3(pos[a],pos[a+1],pos[a+2]),
+      new THREE.Vector3(pos[b],pos[b+1],pos[b+2])
+    ]),new THREE.LineBasicMaterial({color:0x333355,transparent:true,opacity:.06})));
+  }
+
+  let mx=0,my=0;
+  window.addEventListener('mousemove',e=>{mx=(e.clientX/innerWidth-.5);my=(e.clientY/innerHeight-.5);});
+
+  let fr=0;
+  function animate(){
+    requestAnimationFrame(animate); fr++;
+    const pa=ptG.attributes.position.array;
+    for(let i=0;i<N;i++){
+      pa[i*3]+=vel[i].x; pa[i*3+1]+=vel[i].y; pa[i*3+2]+=vel[i].z;
+      if(Math.abs(pa[i*3])>90)vel[i].x*=-1;
+      if(Math.abs(pa[i*3+1])>65)vel[i].y*=-1;
+      if(Math.abs(pa[i*3+2])>35)vel[i].z*=-1;
+    }
+    ptG.attributes.position.needsUpdate=true;
+    camera.position.x+=(mx*6-camera.position.x)*.03;
+    camera.position.y+=(-my*4-camera.position.y)*.03;
+    camera.lookAt(0,0,0);
+    renderer.render(scene,camera);
+  }
+  animate();
+})();
+
+// ══════════ TYPED TERMINAL DEMO ══════════
+const demos=[
+  {cmd:'run the project in /home/user/myapp',lines:[
+    {d:500,cls:'dm-or',t:'📋 Plan: Analyze → Install deps → Start server'},
+    {d:900,cls:'dm-tool',t:'⚙️  scan_project  /home/user/myapp'},
+    {d:1200,cls:'dm-out',t:'Framework: Django · Python · pip'},
+    {d:1500,cls:'dm-tool',t:'⚙️  run_command  pip install -r requirements.txt'},
+    {d:2100,cls:'dm-gr',t:'✓ All packages installed'},
+    {d:2400,cls:'dm-tool',t:'⚙️  run_command  python manage.py runserver'},
+    {d:2900,cls:'dm-gr',t:'✓ Server running at http://127.0.0.1:8000'},
+  ]},
+  {cmd:'portscan 10.10.14.5',lines:[
+    {d:400,cls:'dm-tool',t:'⚙️  run_command  nmap -sV -sC 10.10.14.5'},
+    {d:900,cls:'dm-cy',t:'22/tcp  ssh   OpenSSH 8.2p1'},
+    {d:1100,cls:'dm-cy',t:'80/tcp  http  Apache 2.4.41'},
+    {d:1300,cls:'dm-cy',t:'8080/tcp      Tomcat 9.0.31'},
+    {d:1600,cls:'dm-tool',t:'🌐 web_search  CVE Tomcat 9.0.31'},
+    {d:2100,cls:'dm-rd',t:'⚠ CVE-2020-1938  CVSS 9.8  Ghostcat RCE'},
+    {d:2400,cls:'dm-or',t:'→ Exploit available in Metasploit'},
+  ]},
+  {cmd:'write a FastAPI API with JWT auth',lines:[
+    {d:300,cls:'dm-or',t:'📋 Plan: Routes → Auth → Models → Test'},
+    {d:700,cls:'dm-tool',t:'✏️  write_file  main.py'},
+    {d:900,cls:'dm-gr',t:'✓ 120 lines written'},
+    {d:1100,cls:'dm-tool',t:'✏️  write_file  auth.py'},
+    {d:1300,cls:'dm-gr',t:'✓ 64 lines written'},
+    {d:1500,cls:'dm-tool',t:'✏️  write_file  models.py'},
+    {d:1700,cls:'dm-gr',t:'✓ 48 lines written'},
+    {d:1900,cls:'dm-tool',t:'⚙️  run_command  uvicorn main:app --reload'},
+    {d:2400,cls:'dm-gr',t:'✓ API running at http://127.0.0.1:8000'},
+  ]},
+];
+let dIdx=0, typing=false;
+function runDemo(){
+  if(typing) return; typing=true;
+  const demo=demos[dIdx]; dIdx=(dIdx+1)%demos.length;
+  const cmdEl=document.getElementById('demo-cmd');
+  const outEl=document.getElementById('demo-out');
+  const curEl=document.getElementById('demo-cur');
+  if(!cmdEl) return;
+  cmdEl.textContent=''; outEl.innerHTML=''; curEl.style.display='inline-block';
+  let i=0;
+  const iv=setInterval(()=>{
+    if(i<demo.cmd.length){ cmdEl.textContent+=demo.cmd[i++]; }
+    else{
+      clearInterval(iv); curEl.style.display='none';
+      demo.lines.forEach(l=>{
+        setTimeout(()=>{
+          const d=document.createElement('div');
+          d.className='demo-line '+l.cls;
+          d.style.animation='fadeUp .25s ease';
+          d.textContent=l.t;
+          outEl.appendChild(d);
+        },l.d);
+      });
+      const last=demo.lines[demo.lines.length-1];
+      setTimeout(()=>{typing=false;},last.d+4000);
+    }
+  },36);
+}
+setTimeout(runDemo,1200);
+setInterval(()=>{ if(!typing) runDemo(); },13000);
+
+// ══════════ SCROLL REVEAL ══════════
+const io=new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting){x.target.classList.add('visible');io.unobserve(x.target);}});},{threshold:.1});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+
+// ══════════ NAV SCROLL ══════════
+window.addEventListener('scroll',()=>{
+  const nav=document.getElementById('navbar');
+  nav.style.borderBottomColor=scrollY>40?'var(--bd)':'transparent';
+});
+
+// ══════════ COPY INSTALL ══════════
+function copyText(id, btn){
+  const el=document.getElementById(id);
+  if(!el) return;
+  navigator.clipboard.writeText(el.textContent).then(()=>{
+    const prev=btn.textContent;
+    btn.textContent='copied!'; btn.style.color='var(--gr)';
+    setTimeout(()=>{btn.textContent=prev;btn.style.color='';},2000);
+  });
+}
+
+// ══════════ @keyframes for demo lines ══════════
+const s=document.createElement('style');
+s.textContent='@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}';
+document.head.appendChild(s);
+</script>
+</body>
+</html>

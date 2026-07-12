@@ -4,14 +4,32 @@
 
 import os
 import json
+import uuid
 import urllib.request
 import urllib.error
+import urllib.parse
 from pathlib import Path
 from google.genai import types
-from agent2.config import IS_WIN, IS_MAC
+from agent2.config import IS_WIN, IS_MAC, OS_NAME, SHELL_LABEL
 from agent2.database import exe
 
+MAX_FILE = 100_000   # max chars returned by read_file
+
 def status_line(msg, typ=None):
+    pass
+
+
+def add_mem(content: str, importance: int = 5, tags=None) -> None:
+    """Persist a memory into the web app's memories table (id, content)."""
+    try:
+        exe("INSERT INTO memories(id, content) VALUES(?, ?)",
+            (str(uuid.uuid4()), content))
+    except Exception:
+        pass
+
+
+def print_plan(title, steps) -> None:
+    """No-op in the web context; the plan is surfaced via the tool result."""
     pass
 
 def _impl_read(args: dict) -> dict:
@@ -144,6 +162,107 @@ def _impl_multi_edit(args: dict) -> dict:
             results.append(f"{p}: Error {e}")
     return {"results": "\n".join(results)}
 
+def _impl_list_dir(args: dict) -> dict:
+    raw = args.get("path", ".")
+    p = Path(raw).expanduser()
+    if not p.is_absolute():
+        p = Path(os.getcwd()) / p
+    p = p.resolve()
+    if not p.exists():
+        return {"error": f"Not found: {p}"}
+    if p.is_file():
+        return {"path": str(p), "is_file": True, "size": p.stat().st_size}
+    skip = {".git", "node_modules", "__pycache__", ".venv", "venv", "dist", "build", ".next"}
+    entries = []
+    try:
+        for item in sorted(p.iterdir(), key=lambda x: (x.is_file(), x.name.lower())):
+            if item.name in skip:
+                continue
+            if item.is_dir():
+                entries.append(f"{item.name}/")
+            else:
+                entries.append(f"{item.name}  ({item.stat().st_size} B)")
+        return {"path": str(p), "count": len(entries), "entries": entries}
+    except Exception as ex:
+        return {"error": str(ex)}
+
+
+def _impl_delete_file(args: dict) -> dict:
+    import shutil as _sh
+    p = Path(args.get("path", "")).expanduser()
+    if not p.exists():
+        return {"error": f"Not found: {p}"}
+    try:
+        if p.is_dir():
+            _sh.rmtree(p)
+            return {"success": True, "deleted": str(p), "type": "dir"}
+        p.unlink()
+        return {"success": True, "deleted": str(p), "type": "file"}
+    except Exception as ex:
+        return {"error": str(ex)}
+
+
+def _impl_grep(args: dict) -> dict:
+    import re as _re
+    pattern = args.get("pattern", "")
+    if not pattern:
+        return {"error": "pattern required"}
+    raw = args.get("path", ".")
+    root = Path(raw).expanduser()
+    if not root.is_absolute():
+        root = Path(os.getcwd()) / root
+    root = root.resolve()
+    glob = args.get("glob", "")
+    try:
+        rx = _re.compile(pattern)
+    except Exception as ex:
+        return {"error": f"bad regex: {ex}"}
+    skip = {".git", "node_modules", "__pycache__", ".venv", "venv", "dist", "build", ".next"}
+    hits, scanned = [], 0
+    targets = [root] if root.is_file() else root.rglob(glob or "*")
+    for fp in targets:
+        if not fp.is_file():
+            continue
+        if any(part in skip for part in fp.parts):
+            continue
+        try:
+            scanned += 1
+            for i, line in enumerate(fp.read_text(encoding="utf-8", errors="ignore").splitlines(), 1):
+                if rx.search(line):
+                    hits.append(f"{fp}:{i}: {line.strip()[:200]}")
+                    if len(hits) >= 200:
+                        return {"pattern": pattern, "matches": hits, "truncated": True, "files_scanned": scanned}
+        except Exception:
+            pass
+    return {"pattern": pattern, "matches": hits, "match_count": len(hits), "files_scanned": scanned}
+
+
+# In-memory todo store (per process) for the plan/todo tracker.
+_TODO_STATE: list[dict] = []
+
+def _impl_update_todo(args: dict) -> dict:
+    """Maintain a live task list so the agent can plan and track a big build."""
+    global _TODO_STATE
+    todos = args.get("todos")
+    if isinstance(todos, list):
+        _TODO_STATE = []
+        for t in todos:
+            if isinstance(t, dict):
+                _TODO_STATE.append({
+                    "task":   str(t.get("task", ""))[:200],
+                    "status": t.get("status", "pending"),
+                })
+            else:
+                _TODO_STATE.append({"task": str(t)[:200], "status": "pending"})
+    done = sum(1 for t in _TODO_STATE if t["status"] == "completed")
+    return {
+        "todos": _TODO_STATE,
+        "total": len(_TODO_STATE),
+        "completed": done,
+        "progress": f"{done}/{len(_TODO_STATE)}",
+    }
+
+
 def dispatch_tool(name: str, args: dict) -> dict:
     if name == "read_file":        return _impl_read(args)
     if name == "write_file":       return _impl_write(args)
@@ -152,6 +271,10 @@ def dispatch_tool(name: str, args: dict) -> dict:
     if name == "emit_plan":        return _impl_plan(args)
     if name == "scan_project":     return _impl_scan_project(args)
     if name == "multi_edit_files": return _impl_multi_edit(args)
+    if name == "list_dir":         return _impl_list_dir(args)
+    if name == "delete_file":      return _impl_delete_file(args)
+    if name == "grep_search":      return _impl_grep(args)
+    if name == "update_todo":      return _impl_update_todo(args)
     return {"error": f"Unknown tool: {name}"}
 
 # ── Gemini tool declarations ────────────────────────────────────────────────────
@@ -211,5 +334,30 @@ def _build_tools() -> types.Tool:
                     "new_text": S(type=T.STRING)
                 }))
             }, required=["edits"])),
+        types.FunctionDeclaration(name="list_dir",
+            description="List the contents of a directory (files + subfolders). Use to explore a project's structure before reading or editing.",
+            parameters=S(type=T.OBJECT, properties={
+                "path": S(type=T.STRING),
+            }, required=["path"])),
+        types.FunctionDeclaration(name="delete_file",
+            description="Delete a file or directory (recursively). Use when refactoring or removing generated artifacts.",
+            parameters=S(type=T.OBJECT, properties={
+                "path": S(type=T.STRING),
+            }, required=["path"])),
+        types.FunctionDeclaration(name="grep_search",
+            description="Search file contents by regex across a directory tree. Returns file:line: matches. Use to locate symbols, functions, or usages in a codebase.",
+            parameters=S(type=T.OBJECT, properties={
+                "pattern": S(type=T.STRING),
+                "path":    S(type=T.STRING),
+                "glob":    S(type=T.STRING),
+            }, required=["pattern"])),
+        types.FunctionDeclaration(name="update_todo",
+            description="Create/update a live TODO checklist for a multi-step build. Pass the full list each time with each item's status (pending|in_progress|completed). Call this FIRST for any big task, then update statuses as you finish steps so the user sees progress.",
+            parameters=S(type=T.OBJECT, properties={
+                "todos": S(type=T.ARRAY, items=S(type=T.OBJECT, properties={
+                    "task":   S(type=T.STRING),
+                    "status": S(type=T.STRING),
+                }))
+            }, required=["todos"])),
     ])
 

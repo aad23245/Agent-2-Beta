@@ -17,15 +17,12 @@ from pathlib import Path
 # ── Root paths ─────────────────────────────────────────────────────────────────
 ROOT = Path(__file__).parent.parent   # project root (where run.py lives)
 DB   = ROOT / "agent2.db"
-ENV  = ROOT / ".env"
+ENV  = ROOT / ".env"                   # legacy — only read once for migration
 
-# ── Auto-load .env (must run before anything imports os.environ values) ────────
-if ENV.exists():
-    for _line in ENV.read_text(encoding="utf-8").splitlines():
-        _line = _line.strip()
-        if _line and not _line.startswith("#") and "=" in _line:
-            _k, _v = _line.split("=", 1)
-            os.environ.setdefault(_k.strip(), _v.strip().strip('"').strip("'"))
+# NOTE: Agent2 no longer uses .env for configuration. All API keys (Gemini +
+# custom providers) live in agent2.db. The ENV path above is kept solely so the
+# database layer can perform a one-time import of any old .env keys, after which
+# the file is renamed to .env.migrated and never read again.
 
 # ── Platform ───────────────────────────────────────────────────────────────────
 OS_NAME = _plat.system()   # "Windows" | "Darwin" | "Linux"
@@ -86,7 +83,17 @@ MODES: dict[str, dict] = {
 }
 DEFAULT_MODE = "pro"
 
+# ── Burp Suite MCP bridge ──────────────────────────────────────────────────────
+# Agent2 connects to the official PortSwigger "MCP Server" BApp inside Burp,
+# exposing every Burp tool (proxy history, Repeater, Intruder, Scanner, …) to
+# the agent. Override via .env: BURP_MCP_URL / BURP_MCP_ENABLED.
+BURP_MCP_URL     = os.environ.get("BURP_MCP_URL", "http://127.0.0.1:9876")
+# Auto-connect is OFF by default — Burp connects only when the user explicitly
+# clicks "Connect" (web) or runs `/burp connect` (CLI), or turns on the
+# auto-connect toggle. Override the initial default via .env: BURP_MCP_ENABLED=1.
+BURP_MCP_ENABLED = os.environ.get("BURP_MCP_ENABLED", "0").strip().lower() not in ("0", "false", "no", "off")
+
 # ── Agent limits ───────────────────────────────────────────────────────────────
-MAX_CTX_MESSAGES = 20       # max messages sent to Gemini per turn
-MAX_TOOL_OUTPUT  = 3_000    # max chars from a command that go back into context
-MAX_AGENT_ITERS  = 10       # max tool-call iterations per user message
+MAX_CTX_MESSAGES = 40       # max messages sent to the model per turn
+MAX_TOOL_OUTPUT  = 6_000    # max chars from a command that go back into context
+MAX_AGENT_ITERS  = 40       # max tool-call iterations per user message (big builds)

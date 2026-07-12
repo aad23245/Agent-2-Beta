@@ -39,6 +39,41 @@ from .logger import logger
 HandlerFunc = Callable[[GitHubAPI, GeminiClient], None]
 
 
+def _run_pipeline(
+    steps: list,
+    github_api: GitHubAPI,
+    gemini_client: GeminiClient,
+) -> None:
+    """Run a sequence of review steps, isolating failures.
+
+    Each step is executed independently: if one raises, the error is
+    logged and the remaining steps still run.  This prevents a single
+    failing module (e.g. a transient Gemini error during code review)
+    from silently skipping later steps such as summary generation.
+
+    Args:
+        steps: A list of ``(name, callable)`` tuples to execute in order.
+        github_api: Authenticated GitHub API wrapper instance.
+        gemini_client: Gemini AI client.
+    """
+    failures = 0
+    for name, step in steps:
+        try:
+            step(github_api, gemini_client)
+        except Exception as exc:  # noqa: BLE001
+            failures += 1
+            logger.error(
+                "Pipeline step '%s' failed: %s", name, exc, exc_info=True
+            )
+
+    if failures:
+        logger.warning(
+            "%d of %d pipeline step(s) failed. See logs above.",
+            failures,
+            len(steps),
+        )
+
+
 def _get_handler(module_name: str) -> Optional[HandlerFunc]:
     """Resolve a module name to its handler function.
 
@@ -66,9 +101,15 @@ def _get_handler(module_name: str) -> Optional[HandlerFunc]:
                 from .modules.summary_generator import run as generate_summary
                 from .modules.priority_detector import run as detect_priority
 
-                classify_issue(github_api, gemini_client)
-                generate_summary(github_api, gemini_client)
-                detect_priority(github_api, gemini_client)
+                _run_pipeline(
+                    [
+                        ("issue_classifier", classify_issue),
+                        ("summary_generator", generate_summary),
+                        ("priority_detector", detect_priority),
+                    ],
+                    github_api,
+                    gemini_client,
+                )
 
             return _issue_review_handler
 
@@ -80,12 +121,20 @@ def _get_handler(module_name: str) -> Optional[HandlerFunc]:
                 from .modules.pr_classifier import run as classify_pr
                 from .modules.ai_code_review import run as review_code
                 from .modules.security_review import run as review_security
+                from .modules.dependency_checker import run as review_deps
                 from .modules.summary_generator import run as generate_summary
 
-                classify_pr(github_api, gemini_client)
-                review_code(github_api, gemini_client)
-                review_security(github_api, gemini_client)
-                generate_summary(github_api, gemini_client)
+                _run_pipeline(
+                    [
+                        ("pr_classifier", classify_pr),
+                        ("ai_code_review", review_code),
+                        ("security_review", review_security),
+                        ("dependency_checker", review_deps),
+                        ("summary_generator", generate_summary),
+                    ],
+                    github_api,
+                    gemini_client,
+                )
 
             return _pr_review_handler
 
@@ -95,6 +144,14 @@ def _get_handler(module_name: str) -> Optional[HandlerFunc]:
 
         elif module_name == "duplicate_check":
             from .modules.duplicate_detector import run
+            return run
+
+        elif module_name == "dependency_check":
+            from .modules.dependency_checker import run
+            return run
+
+        elif module_name == "label_sync":
+            from .modules.label_manager import run
             return run
 
         elif module_name == "spam_check":
@@ -148,9 +205,9 @@ def main() -> None:
         logger.error("Usage: python -m ap_bot.main <module_name>")
         logger.error(
             "Available modules: welcome, issue_review, pr_review, "
-            "issue_labeler, duplicate_check, spam_check, stale_manager, "
-            "documentation_checker, statistics, contributor_manager, "
-            "release_notes, auto_close, scheduler"
+            "issue_labeler, duplicate_check, dependency_check, label_sync, "
+            "spam_check, stale_manager, documentation_checker, statistics, "
+            "contributor_manager, release_notes, auto_close, scheduler"
         )
         sys.exit(1)
 
@@ -163,7 +220,14 @@ def main() -> None:
     required_vars = ["GITHUB_TOKEN", "REPO_NAME"]
 
     # Gemini API key is required for most modules
-    modules_without_gemini = {"stale_manager", "auto_close", "scheduler"}
+    modules_without_gemini = {
+        "stale_manager",
+        "auto_close",
+        "scheduler",
+        "label_sync",
+        "statistics",
+        "documentation_checker",
+    }
     if module_name not in modules_without_gemini:
         required_vars.append("GEMINI_API_KEY")
 

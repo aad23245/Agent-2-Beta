@@ -76,6 +76,11 @@ def run(github_api: GitHubAPI, gemini_client: GeminiClient) -> list[str]:
 
     try:
         pr = github_api.get_pr(pr_number)
+        if not pr:
+            logger.error(
+                f"Could not fetch PR #{pr_number}. Aborting PR classification."
+            )
+            return []
         title: str = pr.get("title", "")
         body: str = pr.get("body", "") or ""
 

@@ -84,6 +84,13 @@ def run(
         else:
             item = github_api.get_issue(issue_number)  # type: ignore[arg-type]
 
+        if not item:
+            logger.error(
+                f"Could not fetch {item_type} #{target_number}. "
+                f"Aborting summary generation."
+            )
+            return None
+
         title: str = item.get("title", "")
         body: str = item.get("body", "") or ""
 

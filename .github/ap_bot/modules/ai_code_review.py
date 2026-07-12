@@ -76,8 +76,13 @@ def run(github_api: GitHubAPI, gemini_client: GeminiClient) -> Optional[str]:
     try:
         # -- Fetch PR metadata and diff --------------------------------------
         pr = github_api.get_pr(pr_number)
+        if not pr:
+            logger.error(
+                f"Could not fetch PR #{pr_number}. Aborting AI code review."
+            )
+            return None
         title: str = pr.get("title", "")
-        diff: str = github_api.get_pr_diff(pr_number)
+        diff: Optional[str] = github_api.get_pr_diff(pr_number)
 
         if not diff:
             logger.info(f"PR #{pr_number} has an empty diff. Skipping code review.")
@@ -85,12 +90,13 @@ def run(github_api: GitHubAPI, gemini_client: GeminiClient) -> Optional[str]:
 
         # -- Truncate diff if necessary --------------------------------------
         truncated = False
-        if len(diff) > _MAX_DIFF_LENGTH:
+        original_length = len(diff)
+        if original_length > _MAX_DIFF_LENGTH:
             diff = diff[:_MAX_DIFF_LENGTH]
             truncated = True
             logger.info(
-                f"Diff for PR #{pr_number} truncated from {len(diff)} "
-                f"to {_MAX_DIFF_LENGTH} characters."
+                f"Diff for PR #{pr_number} truncated from {original_length:,} "
+                f"to {_MAX_DIFF_LENGTH:,} characters."
             )
 
         logger.info(f"Running AI code review on PR #{pr_number}: {title!r}")

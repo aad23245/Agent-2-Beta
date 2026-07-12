@@ -20,10 +20,21 @@ from agent2.config import (
 )
 from agent2.database import qone, exe
 from agent2.agent import run_agent, save_msg
+from agent2.provider_agent import run_provider_agent
 from agent2.terminal import (
     stream_command, send_stdin, kill_proc,
     stop_agent, cleanup_sid,
 )
+
+
+def _dispatch_agent(chat_id, message, sid, term_id, model_key, mode_key,
+                    socketio, attachments):
+    """Route to the Gemini loop or a custom-provider loop based on model_key."""
+    if isinstance(model_key, str) and model_key.startswith("custom:"):
+        pid = model_key.split(":", 1)[1]
+        run_provider_agent(chat_id, message, sid, term_id, pid, socketio, attachments)
+    else:
+        run_agent(chat_id, message, sid, term_id, model_key, mode_key, socketio, attachments)
 
 
 def register_sockets(socketio) -> None:
@@ -54,7 +65,7 @@ def register_sockets(socketio) -> None:
     def on_chat(data):
         sid = request.sid
         threading.Thread(
-            target=run_agent,
+            target=_dispatch_agent,
             args=(
                 data.get("chat_id"),
                 data.get("message", "").strip(),
@@ -105,7 +116,7 @@ def register_sockets(socketio) -> None:
 
         # Re-run the agent with the new text
         threading.Thread(
-            target=run_agent,
+            target=_dispatch_agent,
             args=(chat_id, new_text, sid, term_id, model_key, mode_key, socketio, []),
             daemon=True,
         ).start()
