@@ -61,6 +61,11 @@ CLI_PACKAGES = [
     ("prompt_toolkit", "prompt_toolkit", "Prompt Toolkit (terminal input)"),
 ]
 
+# Import names that are NICE-TO-HAVE, not required. The CLI degrades gracefully
+# when these are missing (see agent2cli.py: _RICH / _PTK fallbacks), so a failed
+# install of one of these must WARN and continue — never abort the whole setup.
+OPTIONAL_IMPORTS = {"rich", "prompt_toolkit"}
+
 # ── Windows console fixes ──────────────────────────────────────────────────────
 if IS_WIN:
     os.system("chcp 65001 >nul 2>&1")
@@ -204,20 +209,56 @@ def install_deps(mode="web"):
     for imp, pip_name, label in packages:
         if pkg_ok(imp):
             print(f"  {g('[OK]')}  {label} {dim('(verified)')}")
-        else:
-            print(f"  {y('[..]')}  Installing {label}...")
-            res = spin_run(f"Installing {label}", 
-                           [str(VENV_PY), "-m", "pip", "install", pip_name, "--quiet"])
-            
-            if res.returncode != 0:
-                print(r(f"  [ERR] Failed to install {label}"))
-                sys.exit(1)
-            
-            if pkg_ok(imp):
-                print(f"  {g('[OK]')}  {label} verified in venv")
-            else:
-                print(r(f"  [ERR] {label} installed but not accessible"))
-                sys.exit(1)
+            continue
+
+        optional = imp in OPTIONAL_IMPORTS
+        if not _pip_install(pip_name, label) or not pkg_ok(imp):
+            if optional:
+                # rich / prompt_toolkit are cosmetic — the CLI has plain-text
+                # fallbacks. Warn loudly but keep going so a flaky wheel build
+                # or network blip never blocks the whole install.
+                print(f"  {y('[!]')}  {label} could not be installed — "
+                      f"{dim('continuing without it (plain-text mode).')}")
+                print(f"         {dim('Install later with:')} "
+                      f"{c(str(VENV_PY) + ' -m pip install ' + pip_name)}")
+                continue
+            print(r(f"  [ERR] {label} is required but could not be installed."))
+            print(f"         {dim('Retry, or install manually:')} "
+                  f"{c(str(VENV_PY) + ' -m pip install ' + pip_name)}")
+            sys.exit(1)
+        print(f"  {g('[OK]')}  {label} verified in venv")
+
+
+def _pip_install(pip_name: str, label: str, attempts: int = 3) -> bool:
+    """Install one package, retrying transient network/handshake failures.
+
+    Returns True on success. Not --quiet on the final attempt so a real build
+    error (e.g. a missing compiler) is visible instead of a silent exit.
+    """
+    for i in range(1, attempts + 1):
+        quiet = ["--quiet"] if i < attempts else []
+        cmd = [str(VENV_PY), "-m", "pip", "install", pip_name,
+               "--disable-pip-version-check", "--timeout", "60"] + quiet
+        suffix = "" if i == 1 else f" (retry {i}/{attempts})"
+        res = spin_run(f"Installing {label}{suffix}", cmd)
+        if res.returncode == 0:
+            return True
+        err = (res.stderr or res.stdout or "").lower()
+        transient = any(k in err for k in (
+            "timed out", "timeout", "connection", "handshake", "ssl",
+            "temporary failure", "read timed out", "eof occurred",
+            "reset by peer", "retries exceeded", "network"))
+        if i < attempts and transient:
+            print(f"  {y('[..]')}  {dim('Network hiccup — retrying in a moment ...')}")
+            time.sleep(2 * i)
+            continue
+        if i >= attempts:
+            snippet = (res.stderr or res.stdout or "").strip().replace("\n", " ")[:300]
+            if snippet:
+                print(f"  {dim(snippet)}")
+        if not transient:
+            break
+    return False
 
 # ── Step 4: API-key storage (agent2.db — no .env) ──────────────────────────────
 # run.py runs on the *system* Python before the venv exists, so it talks to the
@@ -496,8 +537,12 @@ def git_exe():
     return None
 
 
-def ensure_git() -> str:
-    """Return a path to git, installing it first if it is missing. Exits on failure."""
+def ensure_git(required: bool = True):
+    """Return a path to git, installing it first if it is missing.
+
+    If `required` is True (default) and git cannot be made available, print the
+    manual-install hint and exit. If `required` is False, return None instead so
+    the caller can fall back to a git-less path (e.g. ZIP download)."""
     print(f"\n  {w('[ Git ]')}\n")
     exe = git_exe()
     if exe:
@@ -528,7 +573,10 @@ def ensure_git() -> str:
             installer = None
 
     if not installer:
-        print(f"  {r('[ERR]')}  Could not find a package manager to install git.")
+        print(f"  {y('[!]')}  Could not find a package manager to install git.")
+        if not required:
+            return None
+        print(f"  {r('[ERR]')}  git is required for this operation.")
         if IS_WIN:
             print(f"         {dim('Install git manually:')} {c('https://git-scm.com/download/win')}")
         elif IS_MAC:
@@ -539,12 +587,16 @@ def ensure_git() -> str:
 
     res = spin_run("Installing git", installer)
     if res.returncode != 0:
-        print(f"  {r('[ERR]')}  git install failed: {dim((res.stderr or '')[:300])}")
-        print(f"         {dim('Install git manually and retry:')} {c('https://git-scm.com/downloads')}")
+        print(f"  {y('[!]')}  git install failed: {dim((res.stderr or '')[:300])}")
+        if not required:
+            return None
+        print(f"  {r('[ERR]')}  {dim('Install git manually and retry:')} {c('https://git-scm.com/downloads')}")
         sys.exit(1)
 
     exe = git_exe()
     if not exe:
+        if not required:
+            return None
         print(f"  {g('[OK]')}  git installed — but not visible in this session.")
         print(f"         {dim('Open a NEW terminal and run the command again.')}")
         sys.exit(0)
@@ -556,6 +608,117 @@ def _clone_repo(git: str, dest: Path):
     """Shallow-clone REPO_URL into *dest*. Returns CompletedProcess."""
     return spin_run("Downloading latest code",
                     [git, "clone", "--depth", "1", REPO_URL, str(dest)])
+
+
+# Branch fetched by the ZIP fallback (must match the repo's default branch).
+REPO_BRANCH = "main"
+
+
+def _zip_urls() -> list[str]:
+    """Candidate ZIP endpoints for REPO_URL (codeload is fastest; github.com
+    archive is the documented fallback). Both yield a single top-level folder."""
+    slug = REPO_URL.rstrip("/").replace("https://github.com/", "").replace(".git", "")
+    return [
+        f"https://codeload.github.com/{slug}/zip/refs/heads/{REPO_BRANCH}",
+        f"https://github.com/{slug}/archive/refs/heads/{REPO_BRANCH}.zip",
+    ]
+
+
+def _download_zip_snapshot(dest: Path) -> tuple[bool, str]:
+    """Download the repo as a ZIP (no git needed) and extract it INTO *dest* so
+    the layout matches a `git clone` (run.py at the top level). Retries transient
+    network/handshake errors and tries each candidate URL. Returns (ok, error)."""
+    import io, zipfile, tempfile
+    import urllib.request, urllib.error, ssl
+
+    ctx = ssl.create_default_context()
+    last_err = ""
+    for url in _zip_urls():
+        for attempt in range(1, 4):
+            box = {"data": None, "err": ""}
+
+            def _fetch():
+                try:
+                    req = urllib.request.Request(
+                        url, headers={"User-Agent": "Agent2-installer",
+                                      "Accept": "application/zip"})
+                    with urllib.request.urlopen(req, timeout=90, context=ctx) as r:
+                        box["data"] = r.read()
+                except urllib.error.HTTPError as e:
+                    box["err"] = f"HTTP {e.code}"
+                except Exception as e:                     # URLError, SSL, timeout, reset
+                    box["err"] = str(getattr(e, "reason", e) or e)
+
+            done = threading.Event()
+            def _work():
+                try: _fetch()
+                finally: done.set()
+            threading.Thread(target=_work, daemon=True).start()
+            for f in itertools.cycle(SPIN):
+                if done.is_set(): break
+                tag = "" if attempt == 1 else f" (retry {attempt}/3)"
+                print(f"\r  [{GR}{f}{R}]  Downloading ZIP snapshot{tag} ...", end="", flush=True)
+                time.sleep(0.10)
+
+            data, err = box["data"], box["err"]
+            if data:
+                print(f"\r  {g('[OK]')}  Downloaded ZIP snapshot ({len(data)//1024} KB)      ")
+                try:
+                    with zipfile.ZipFile(io.BytesIO(data)) as zf:
+                        tmp = Path(tempfile.mkdtemp(prefix="agent2_zip_", dir=str(dest.parent)))
+                        zf.extractall(tmp)
+                        # The archive wraps everything in one top folder (e.g.
+                        # Agent-2-Beta-main/). Move THAT folder's contents to dest.
+                        tops = [p for p in tmp.iterdir() if p.is_dir()]
+                        root = tops[0] if len(tops) == 1 else tmp
+                        if not (root / "run.py").exists():
+                            # Fallback: search for the folder that holds run.py.
+                            hits = list(tmp.rglob("run.py"))
+                            if hits:
+                                root = hits[0].parent
+                        shutil.move(str(root), str(dest))
+                        shutil.rmtree(tmp, ignore_errors=True)
+                    return (True, "")
+                except Exception as e:
+                    last_err = f"ZIP extract failed: {e}"
+                    return (False, last_err)
+
+            print(f"\r  {y('[!]')}  ZIP download failed{(': ' + err) if err else ''}        ")
+            last_err = err or "download failed"
+            low = last_err.lower()
+            transient = any(k in low for k in (
+                "timed out", "timeout", "handshake", "ssl", "reset",
+                "connection", "temporary", "eof"))
+            if attempt < 3 and transient:
+                time.sleep(2 * attempt)
+                continue
+            break  # non-transient (e.g. HTTP 404) — try the next URL
+    return (False, last_err or "could not download ZIP")
+
+
+def fetch_snapshot(snapshot: Path) -> tuple[bool, str]:
+    """Populate *snapshot* with a fresh copy of the repo, preferring git and
+    falling back to a ZIP download when git is unavailable or the clone fails.
+    Returns (ok, error). On success `snapshot` contains run.py at its top level.
+
+    This owns ALL acquisition logic — it will try to auto-install git, then try
+    a shallow clone, then a ZIP download — so a machine with no git (and no way
+    to install it) still gets a working install."""
+    git = ensure_git(required=False)   # prints the [ Git ] header; may auto-install
+    if git:
+        res = _clone_repo(git, snapshot)
+        if res.returncode == 0 and _validate_snapshot(snapshot):
+            return (True, "")
+        print(f"  {y('[!]')}  git clone failed — falling back to ZIP download.")
+        if snapshot.exists():
+            _rm_path(snapshot)
+    else:
+        print(f"  {y('[!]')}  Proceeding without git — downloading a ZIP instead.")
+
+    ok, err = _download_zip_snapshot(snapshot)
+    if ok and _validate_snapshot(snapshot):
+        return (True, "")
+    return (False, err or "downloaded copy is incomplete")
 
 
 def _validate_snapshot(src: Path) -> bool:
@@ -582,20 +745,15 @@ def self_update():
     print(f"  {dim('Target:')} {dim(str(ROOT))}")
     print(f"  {dim('Preserved:')} {g('agent2.db')} {dim('(your keys, data & settings)')}\n")
 
-    git = ensure_git()
-
     # 1) Download into a temp staging dir (sibling of ROOT so os.replace is cheap).
+    #    fetch_snapshot() handles git-or-ZIP acquisition and prints the [ Git ] step.
     import tempfile
     staging = Path(tempfile.mkdtemp(prefix="agent2_update_", dir=str(ROOT.parent)))
     snapshot = staging / "snapshot"
     try:
-        res = _clone_repo(git, snapshot)
-        if res.returncode != 0:
-            print(f"  {r('[ERR]')}  Download failed: {dim((res.stderr or '')[:300])}")
-            print(f"  {g('[OK]')}  Nothing was changed. Your current install is intact.")
-            return
-        if not _validate_snapshot(snapshot):
-            print(f"  {r('[ERR]')}  Downloaded code looks incomplete (run.py missing).")
+        ok, err = fetch_snapshot(snapshot)
+        if not ok:
+            print(f"  {r('[ERR]')}  Download failed: {dim(err[:300])}")
             print(f"  {g('[OK]')}  Nothing was changed. Your current install is intact.")
             return
 
@@ -677,16 +835,13 @@ def bootstrap_if_needed():
     print(f"  {dim('Source:')} {c(REPO_URL)}")
     print(f"  {dim('Target:')} {dim(str(ROOT))}\n")
 
-    git = ensure_git()
-
     import tempfile
     staging = Path(tempfile.mkdtemp(prefix="agent2_boot_", dir=str(ROOT.parent)))
     snapshot = staging / "snapshot"
     try:
-        res = _clone_repo(git, snapshot)
-        if res.returncode != 0 or not _validate_snapshot(snapshot):
-            print(f"  {r('[ERR]')}  Could not download the project: "
-                  f"{dim((res.stderr or 'incomplete checkout')[:300])}")
+        ok, err = fetch_snapshot(snapshot)
+        if not ok:
+            print(f"  {r('[ERR]')}  Could not download the project: {dim(err[:300])}")
             print(f"         {dim('Check your connection and retry:')} {c('python run.py')}")
             sys.exit(1)
 
