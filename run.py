@@ -98,7 +98,7 @@ def banner():
     print(r"        |___/                      ")
     print(R)
     print(f"  {CY}{'═' * 46}{R}")
-    print(f"  {w('Autonomous Terminal Agent')}  {dim('v2.1')}")
+    print(f"  {w('Autonomous Terminal Agent2')}  {dim('v2.1')}")
     print(f"  {dim(OS_NAME + ' ' + platform.machine() + '  |  Python ' + sys.version.split()[0])}")
     print(f"  {CY}{'═' * 46}{R}\n")
 
