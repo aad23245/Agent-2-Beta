@@ -1,0 +1,6 @@
+google-genai
+mcp
+flask
+flask-socketio
+rich
+prompt_toolkit
